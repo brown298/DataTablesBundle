@@ -1,5 +1,5 @@
 {
-    "name": "brown298/datatablesbundle",
+    "name": "Brown298/DataTablesBundle",
     "type": "symfony-bundle",
     "description": "Adds DataTables functionality to Symfony2",
     "keywords": ["symfony2","datatables"],
@@ -18,7 +18,7 @@
         },
         {
             "type": "vcs",
-            "url": "https://brown298@bitbucket.org/brown298/datatablesbundle.git"
+            "url": "https://bitbucket.org/brown298/datatablesbundle.git"
         }
     ],
     "autoload": {
@@ -26,7 +26,6 @@
             "Brown298\\DataTablesBundle\\": ""
         }
     },
-    "target-dir": "Brown298/DataTablesBundle",
     "require": {
         "jquery/jquery":                     "1.9.*",
         "php":                               ">=5.3.3",
