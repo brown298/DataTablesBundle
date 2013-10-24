@@ -23,7 +23,7 @@
     ],
     "autoload": {
         "psr-0": {
-            "Brown298\\DataTablesBundle": ""
+            "Brown298\\DataTablesBundle\\": ""
         }
     },
     "target-dir": "Brown298/DataTablesBundle",
