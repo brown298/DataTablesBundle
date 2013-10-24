@@ -15,6 +15,10 @@
                     "type": "file"
                 }
             }
+        },
+        {
+            "type": "vcs",
+            "url": "https://bitbucket.org/brown298/datatablesbundle.git"
         }
     ],
     "autoload": {
