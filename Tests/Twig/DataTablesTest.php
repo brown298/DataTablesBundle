@@ -71,7 +71,7 @@ class DataTablesTest extends AbstractBaseTest
 
     /**
      * testRenderJs
-     * 
+     *
      */
     public function testRenderJs()
     {
@@ -83,6 +83,18 @@ class DataTablesTest extends AbstractBaseTest
 
         $this->assertEquals('test', $result);
         Phake::verify($this->environment)->render('template', $this->anything());
+    }
+
+    /**
+     * testGetFunctions
+     *
+     * ensures get functions returns the expected methods
+     */
+    public function testGetFunctions()
+    {
+        $results = $this->service->getFunctions();
+        $this->assertArrayHasKey('addDataTable', $results);
+        $this->assertInstanceOf('Twig_Function_Method', $results['addDataTable']);
     }
 
 } 
