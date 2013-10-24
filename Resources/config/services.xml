@@ -8,10 +8,18 @@
         <!-- Services-->
         <parameter key="data_tables.service.class">Brown298\DataTablesBundle\Service\ServerProcessService</parameter>
 
+        <!-- twig extensions -->
+        <parameter key="data_tables.twig.extension.class">Brown298\DataTablesBundle\Twig\DataTables</parameter>
+
     </parameters>
     <services>
         <!-- Services-->
         <service id="data_tables.service" class="%data_tables.service.class%" />
+
+        <!-- twig extensions -->
+        <service id="data_tables.twig.extension" class="%data_tables.twig.extension.class%">
+            <tag name="twig.extension" />
+        </service>
 
     </services>
 

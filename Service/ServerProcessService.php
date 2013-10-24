@@ -127,7 +127,6 @@ class ServerProcessService
     {
         $this->responseParameters = new ResponseParameterBag();
         $this->responseParameters->setRequest($this->requestParameters);
-
         if ($this->data == null) {
             $aliases = $this->getRootAliases();
             $alias   = $aliases[0];
@@ -137,7 +136,15 @@ class ServerProcessService
             $this->responseParameters->setDisplayTotal($this->getTotalRecords($qb, $alias));
             $this->responseParameters->setData($qb->getQuery()->getArrayResults());
         } else {
-            $data = array_slice($this->data, $this->requestParameters->getOffset(), $this->requestParameters->getDisplayLength());
+            $offset = $this->requestParameters->getOffset();
+            $length = $this->requestParameters->getDisplayLength();
+
+            if ($length > 0) {
+                $data = array_slice($this->data, $offset, $length);
+            } else {
+                $data = array_slice($this->data, $offset);
+            }
+
             $this->responseParameters->setTotal(count($this->data));
             $this->responseParameters->setDisplayTotal(count($data));
             $this->responseParameters->setData($data);
