@@ -243,7 +243,11 @@ class RequestParameterBag extends AbstractParamterBag
      */
     public function getSortingColumn($id)
     {
-        return $this->getVarByName('sortCols', $id);
+        $columns = $this->getColumns();
+        $currCol = $this->getVarByName('sortCols', $id);
+        $cols    = array_keys($columns);
+
+        return $cols[$currCol];
     }
 
     /**

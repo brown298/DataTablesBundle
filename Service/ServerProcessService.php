@@ -36,6 +36,10 @@ class ServerProcessService
      */
     protected $responseParameters;
 
+    /**
+     * @var array
+     */
+    protected $data = null;
 
     /**
      * @param Request $request
@@ -81,6 +85,36 @@ class ServerProcessService
         }
     }
 
+    /**
+     * addColumn
+     *
+     * @param $name
+     * @param $title
+     */
+    public function addColumn($name, $title)
+    {
+        $this->requestParameters->addColumn($name, $title);
+    }
+
+    /**
+     * setColumns
+     *
+     * @param array $columns
+     */
+    public function setColumns(array $columns)
+    {
+        $this->requestParameters->setColumns($columns);
+    }
+
+    /**
+     * getColumns
+     *
+     * @return array
+     */
+    public function getColumns()
+    {
+        return $this->requestParameters->getColumns();
+    }
 
     /**
      * process
@@ -91,14 +125,23 @@ class ServerProcessService
      */
     public function process()
     {
-        $alias                    = $this->queryBuilder->getRootAlias();
         $this->responseParameters = new ResponseParameterBag();
-        $qb                       = $this->buildQuery($alias);
-
         $this->responseParameters->setRequest($this->requestParameters);
-        $this->responseParameters->setTotal($this->getTotalRecords(clone($this->queryBuilder), $alias));
-        $this->responseParameters->setDisplayTotal($this->getTotalRecords($qb, $alias));
-        $this->responseParameters->setData($qb->getQuery()->getArrayResults());
+
+        if ($this->data == null) {
+            $aliases = $this->getRootAliases();
+            $alias   = $aliases[0];
+            $qb      = $this->buildQuery($alias);
+
+            $this->responseParameters->setTotal($this->getTotalRecords(clone($this->queryBuilder), $alias));
+            $this->responseParameters->setDisplayTotal($this->getTotalRecords($qb, $alias));
+            $this->responseParameters->setData($qb->getQuery()->getArrayResults());
+        } else {
+            $data = array_slice($this->data, $this->requestParameters->getOffset(), $this->requestParameters->getDisplayLength());
+            $this->responseParameters->setTotal(count($this->data));
+            $this->responseParameters->setDisplayTotal(count($data));
+            $this->responseParameters->setData($data);
+        }
 
         return $this->responseParameters->all();
     }
@@ -196,7 +239,9 @@ class ServerProcessService
      *
      * gets the total records from the query
      *
-     * @param string $alias
+     * @param \Doctrine\ORM\QueryBuilder $qb
+     * @param string                     $alias
+     *
      * @return mixed
      */
     public function getTotalRecords(QueryBuilder $qb, $alias)
@@ -206,5 +251,37 @@ class ServerProcessService
 
         $rawResult = $qb->getQuery()->getArrayResults();
         return $rawResult[0]['count'];
+    }
+
+    /**
+     * @param array $data
+     */
+    public function setData(array $data)
+    {
+        $this->data = $data;
+    }
+
+    /**
+     * @return array
+     */
+    public function getData()
+    {
+        return $this->data;
+    }
+
+    /**
+     * @return \Brown298\DataTablesBundle\Model\RequestParameterBag
+     */
+    public function getRequestParameters()
+    {
+        return $this->requestParameters;
+    }
+
+    /**
+     * @return \Brown298\DataTablesBundle\Model\ResponseParameterBag
+     */
+    public function getResponseParameters()
+    {
+        return $this->responseParameters;
     }
 }

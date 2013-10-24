@@ -1,6 +1,8 @@
 <?php
 namespace Brown298\DataTablesBundle\Controller;
 
+use Brown298\DataTablesBundle\Model\ResponseParameterBag;
+use Doctrine\ORM\QueryBuilder;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
@@ -16,11 +18,26 @@ abstract class AbstractController extends Controller
 {
 
     /**
+     * getData
+     *
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     *
+     * @return array
+     */
+    protected function getData(Request $request)
+    {
+        return array();
+    }
+
+    /**
      * getQueryBuilder
      *
      * @return null
      */
-    abstract protected function getQueryBuilder();
+     protected function getQueryBuilder()
+     {
+        return null;
+     }
 
     /**
      * dataAction
@@ -31,7 +48,13 @@ abstract class AbstractController extends Controller
      */
     public function dataAction(Request $request)
     {
-        return new JsonResponse($this->getDataResponse($request, $this->getQueryBuilder()));
+        $qb = $this->getQueryBuilder();
+        if ($qb !== null) {
+            $data = $this->getDataByQueryBuilder($request, $this->getQueryBuilder());
+        } else {
+            $data = $this->getData($request);
+        }
+        return new JsonResponse($data);
     }
 
     /**
@@ -42,7 +65,7 @@ abstract class AbstractController extends Controller
      *
      * @return JsonResponse
      */
-    protected function getData(Request $request, QueryBuilder $qb)
+    protected function getDataByQueryBuilder(Request $request, QueryBuilder $qb)
     {
         $service = $this->get('data_tables.service');
         $service->setRequest($request);
