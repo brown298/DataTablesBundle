@@ -50,4 +50,16 @@ class AbstractParamterBag extends ParameterBag
 
         return $this->get($const, $default);
     }
+
+    /**
+     * setVarByName
+     *
+     * @param string $name
+     * @param mixed $value
+     */
+    public function setVarByName($name, $value)
+    {
+        $this->set($this->parameterNames[$name]['const'], $value);
+    }
+
 }

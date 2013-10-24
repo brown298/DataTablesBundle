@@ -1,6 +1,8 @@
 <?php
 namespace Brown298\DataTablesBundle\Model;
 
+use Symfony\Component\HttpFoundation\Request;
+
 /**
  * Class RequestParameterBag
  * @package Brown298\DataTablesBundle\Model
@@ -44,7 +46,9 @@ class RequestParameterBag extends AbstractParamterBag
             'default' => 'false',
         ), // columns that are sortable
         'echo' => array(
-            'const' => 'sEcho',
+            'name'    => 'Echo',
+            'const'   => 'sEcho',
+            'default' => null,
         ), //
         'search' => array(
             'name'    => 'Search String',
@@ -67,6 +71,33 @@ class RequestParameterBag extends AbstractParamterBag
      * @var array column data
      */
     protected $columns = array();
+
+    /**
+     * fromRequest
+     *
+     * sets the data from the request
+     *
+     * @param Request $request
+     */
+    public function fromRequest(Request $request)
+    {
+        switch ($request->getMethod()) {
+            case 'GET':
+                $this->parameters = $request->query->all();
+                break;
+            case 'POST':
+                $this->parameters = $request->request->all();
+                break;
+        }
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getEcho()
+    {
+        return $this->getVarByName('echo');
+    }
 
     /**
      * addColumn
