@@ -7,6 +7,12 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader;
 
+/**
+ * Class Brown298DataTablesExtension
+ *
+ * @package Brown298\DataTablesBundle\DependencyInjection
+ * @author  John Brown <brown.john@gmail.com>
+ */
 class Brown298DataTablesExtension extends Extension
 {
     /**

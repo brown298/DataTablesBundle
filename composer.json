@@ -1,5 +1,5 @@
 {
-    "name": "Brown298/DataTablesBundle",
+    "name": "brown298/data-tables-bundle",
     "type": "symfony-bundle",
     "description": "Adds DataTables functionality to Symfony2",
     "keywords": ["symfony2","datatables"],
