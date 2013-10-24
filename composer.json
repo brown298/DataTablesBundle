@@ -15,10 +15,6 @@
                     "type": "file"
                 }
             }
-        },
-        {
-            "type": "vcs",
-            "url": "https://bitbucket.org/brown298/datatablesbundle.git"
         }
     ],
     "autoload": {
@@ -30,8 +26,7 @@
         "jquery/jquery":                     "1.9.*",
         "php":                               ">=5.3.3",
         "doctrine/orm":                      "~2.2,>=2.2.3",
-        "knplabs/knp-paginator-bundle":      "2.3.*@dev",
-        "DataTables/DataTables":             "dev-master"
+        "knplabs/knp-paginator-bundle":      "2.3.*@dev"
     },
     "require-dev": {
         "phpunit/phpunit":           "~3.7",
