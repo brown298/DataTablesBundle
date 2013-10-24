@@ -31,23 +31,23 @@ abstract class AbstractController extends Controller
      */
     public function dataAction(Request $request)
     {
-        return $this->getDataResponse($request, $this->getQueryBuilder());
+        return new JsonResponse($this->getDataResponse($request, $this->getQueryBuilder()));
     }
 
     /**
-     * getDataResponse
+     * getData
      *
      * @param Request $request
      * @param QueryBuilder $qb
      *
      * @return JsonResponse
      */
-    protected function getDataResponse(Request $request, QueryBuilder $qb)
+    protected function getData(Request $request, QueryBuilder $qb)
     {
         $service = $this->get('data_tables.service');
         $service->setRequest($request);
         $service->setQueryBuilder($qb);
 
-        return new JsonResponse($service->process());
+        return $service->process();
     }
 }
