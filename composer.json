@@ -1,0 +1,19 @@
+{
+    "name": "brown298/datatablesbundle",
+    "type": "symfony-bundle",
+    "description": "Adds DataTables functionality to Symfony2",
+    "keywords": ["symfony2","datatables"],
+    "license": "LGPL-3.0+",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://brown298@bitbucket.org/brown298/datatablesbundle.git"
+        }
+    ],
+    "autoload": {
+        "psr-0": {
+            "Brown298\\DataTablesBundle": ""
+        }
+    },
+    "target-dir": "Brown298/DataTablesBundle"
+}
