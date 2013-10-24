@@ -202,25 +202,6 @@ class RequestParameterBag extends AbstractParamterBag
     }
 
     /**
-     * getVarByName
-     *
-     * gets a formatted variabl by name
-     *
-     * @param string  $name
-     * @param integer $id
-     *
-     * @return mixed
-     */
-    public function getVarByName($name, $id)
-    {
-        return $this->get(
-            sprintf($this->parameterNames[$name]['const'], $id),
-            $this->parameterNames[$name]['default']
-        );
-    }
-
-
-    /**
      * getSortingColumn
      *
      * gets a sorting column by id
@@ -257,10 +238,7 @@ class RequestParameterBag extends AbstractParamterBag
      */
     public function getSortingLength()
     {
-        return intval($this->get(
-            $this->parameterNames['sortLength']['const'],
-            $this->parameterNames['sortLength']['default']
-        ));
+        return intval($this->getVarByName('sortLength'));
     }
 
     /**
@@ -272,7 +250,7 @@ class RequestParameterBag extends AbstractParamterBag
      */
     public function getOffset()
     {
-        return $this->get($this->parameterNames['offset']['const'], 0);
+        return $this->getVarByName('offset');
     }
 
     /**
@@ -284,10 +262,7 @@ class RequestParameterBag extends AbstractParamterBag
      */
     public function getDisplayLength()
     {
-        return $this->get(
-            $this->parameterNames['length']['const'],
-            $this->parameterNames['length']['default']
-        );
+        return $this->getVarByName('length');
     }
 
     /**
