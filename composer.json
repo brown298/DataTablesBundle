@@ -15,10 +15,6 @@
                     "type": "file"
                 }
             }
-        },
-        {
-            "type": "vcs",
-            "url": "https://bitbucket.org/brown298/datatablesbundle.git"
         }
     ],
     "autoload": {
@@ -26,6 +22,7 @@
             "Brown298\\DataTablesBundle\\": ""
         }
     },
+    "target-dir": "Brown298/DataTablesBundle",
     "require": {
         "jquery/jquery":                     "1.9.*",
         "php":                               ">=5.3.3",
