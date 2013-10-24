@@ -102,9 +102,9 @@ class RequestParameterBag extends AbstractParamterBag
     /**
      * addColumn
      */
-    public function addColumn($name, $entity)
+    public function addColumn($name, $title)
     {
-        $this->columns[$name] = $entity;
+        $this->columns[$name] = $title;
     }
 
     /**

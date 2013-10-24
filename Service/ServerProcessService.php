@@ -48,12 +48,39 @@ class ServerProcessService
     }
 
     /**
+     * setQueryBuilder
+     *
      * @param QueryBuilder $queryBuilder]
      */
     public function setQueryBuilder(QueryBuilder $queryBuilder)
     {
         $this->queryBuilder = $queryBuilder;
+        $this->parseColumns($queryBuilder);
     }
+
+    /**
+     * parseColumns
+     *
+     * builds an array of the columns
+     *
+     * @param QueryBuilder $qb
+     */
+    public function parseColumns(QueryBuilder $qb)
+    {
+        $selects = $qb->getDQLPart('select');
+
+        foreach ($selects as $queryPart) {
+            foreach ($queryPart as $part) {
+                if (preg_match('/.+ as .+/', $part)) {
+                    $parts = explode(' as ', $part);
+                    $this->requestParameters->addColumn($parts[0], $parts[1]);
+                } else {
+                    $this->requestParameters->addColumn($part, $part);
+                }
+            }
+        }
+    }
+
 
     /**
      * process
