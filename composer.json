@@ -6,6 +6,17 @@
     "license": "LGPL-3.0+",
     "repositories": [
         {
+            "type": "package",
+            "package": {
+                "name": "jquery/jquery",
+                "version": "1.9.1",
+                "dist": {
+                    "url": "http://code.jquery.com/jquery-1.9.1.js",
+                    "type": "file"
+                }
+            }
+        },
+        {
             "type": "vcs",
             "url": "https://brown298@bitbucket.org/brown298/datatablesbundle.git"
         }
@@ -15,5 +26,18 @@
             "Brown298\\DataTablesBundle": ""
         }
     },
-    "target-dir": "Brown298/DataTablesBundle"
+    "target-dir": "Brown298/DataTablesBundle",
+    "require": {
+        "jquery/jquery":                     "1.9.*",
+        "php":                               ">=5.3.3",
+        "doctrine/orm":                      "~2.2,>=2.2.3",
+        "knplabs/knp-paginator-bundle":      "2.3.*@dev"
+    },
+    "require-dev": {
+        "phpunit/phpunit":           "~3.7",
+        "phake/phake":               "2.0.*@dev",
+        "behat/behat":               "2.4.*@dev",
+        "behat/symfony2-extension":  "1.0.*@dev",
+        "behat/mink-extension":      "1.0.*@dev"
+    }
 }
