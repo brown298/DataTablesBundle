@@ -121,6 +121,8 @@ class ServerProcessService
      *
      * gets the results
      *
+     * @param null $dataFormatter
+     *
      * @return array
      */
     public function process($dataFormatter = null)
@@ -133,8 +135,11 @@ class ServerProcessService
             $alias   = $aliases[0];
 
             $this->responseParameters->setData($qb->getQuery()->getArrayResult());
-            $this->responseParameters->setTotal($this->getTotalRecords(clone($this->queryBuilder), $alias));
-            $this->responseParameters->setDisplayTotal($this->getTotalRecords($qb, $alias));
+            $total        = $this->getTotalRecords(clone($this->queryBuilder), $alias);
+            $displayTotal = $this->getTotalRecords($qb, $alias);
+            
+            $this->responseParameters->setTotal($total);
+            $this->responseParameters->setDisplayTotal($displayTotal);
         } else {
             $offset = $this->requestParameters->getOffset();
             $length = $this->requestParameters->getDisplayLength();
@@ -255,7 +260,7 @@ class ServerProcessService
             ->setMaxResults(1);
 
         $rawResult = $qb->getQuery()->getArrayResult();
-        return $rawResult[0]['count'];
+        return array_pop($rawResult[0]);
     }
 
     /**
