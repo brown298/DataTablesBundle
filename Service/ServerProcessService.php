@@ -146,7 +146,7 @@ class ServerProcessService
 
             $this->responseParameters->setData($qb->getQuery()->getArrayResult());
             $total        = $this->getTotalRecords(clone($this->queryBuilder), $alias);
-            $displayTotal = $this->getTotalRecords($qb, $alias);
+            $displayTotal = $this->getTotalRecords(clone($this->queryBuilder), $alias);
             
             $this->responseParameters->setTotal($total);
             $this->responseParameters->setDisplayTotal($displayTotal);
