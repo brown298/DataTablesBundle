@@ -36,6 +36,28 @@ class ResponseParameterBag extends AbstractParamterBag
     );
 
     /**
+     * all
+     *
+     * @param $dataFormatter
+     *
+     * @return array
+     */
+    public function all($dataFormatter = null)
+    {
+        $results = array();
+
+        foreach ($this->parameterNames as $key => $data) {
+            $results[$data['const']] = $this->getVarByName($key);
+        }
+
+        $dataFormatter = is_callable($dataFormatter) ? $dataFormatter : function($e) {return $e;};
+        $results['aaData'] = $dataFormatter($results['aaData']);
+
+        return $results;
+    }
+
+
+    /**
      * setRequest
      * @param RequestParameterBag $request
      */

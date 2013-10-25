@@ -32,9 +32,11 @@ abstract class AbstractController extends Controller
     /**
      * getQueryBuilder
      *
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     *
      * @return null
      */
-     protected function getQueryBuilder()
+     protected function getQueryBuilder(Request $request)
      {
         return null;
      }
@@ -44,13 +46,15 @@ abstract class AbstractController extends Controller
      *
      * @param Request $request
      *
+     * @param null    $dataFormatter
+     *
      * @return JsonResponse
      */
-    public function dataAction(Request $request)
+    public function dataAction(Request $request, $dataFormatter = null)
     {
-        $qb = $this->getQueryBuilder();
+        $qb = $this->getQueryBuilder($request);
         if ($qb !== null) {
-            $data = $this->getDataByQueryBuilder($request, $this->getQueryBuilder());
+            $data = $this->getDataByQueryBuilder($request, $qb, $dataFormatter);
         } else {
             $data = $this->getData($request);
         }
@@ -60,17 +64,19 @@ abstract class AbstractController extends Controller
     /**
      * getData
      *
-     * @param Request $request
+     * @param Request      $request
      * @param QueryBuilder $qb
+     *
+     * @param null         $dataFormatter
      *
      * @return JsonResponse
      */
-    protected function getDataByQueryBuilder(Request $request, QueryBuilder $qb)
+    protected function getDataByQueryBuilder(Request $request, QueryBuilder $qb, $dataFormatter = null)
     {
         $service = $this->get('data_tables.service');
         $service->setRequest($request);
         $service->setQueryBuilder($qb);
 
-        return $service->process();
+        return $service->process($dataFormatter);
     }
 }

@@ -123,18 +123,18 @@ class ServerProcessService
      *
      * @return array
      */
-    public function process()
+    public function process($dataFormatter = null)
     {
         $this->responseParameters = new ResponseParameterBag();
         $this->responseParameters->setRequest($this->requestParameters);
         if ($this->data == null) {
-            $aliases = $this->getRootAliases();
+            $qb      = $this->buildQuery();
+            $aliases = $qb->getRootAliases();
             $alias   = $aliases[0];
-            $qb      = $this->buildQuery($alias);
 
+            $this->responseParameters->setData($qb->getQuery()->getArrayResult());
             $this->responseParameters->setTotal($this->getTotalRecords(clone($this->queryBuilder), $alias));
             $this->responseParameters->setDisplayTotal($this->getTotalRecords($qb, $alias));
-            $this->responseParameters->setData($qb->getQuery()->getArrayResults());
         } else {
             $offset = $this->requestParameters->getOffset();
             $length = $this->requestParameters->getDisplayLength();
@@ -145,12 +145,12 @@ class ServerProcessService
                 $data = array_slice($this->data, $offset);
             }
 
+            $this->responseParameters->setData($data);
             $this->responseParameters->setTotal(count($this->data));
             $this->responseParameters->setDisplayTotal(count($data));
-            $this->responseParameters->setData($data);
         }
 
-        return $this->responseParameters->all();
+        return $this->responseParameters->all($dataFormatter);
     }
 
     /**
@@ -158,11 +158,9 @@ class ServerProcessService
      *
      * generates the query builder
      *
-     * @param string $alias
-     *
      * @return QueryBuilder
      */
-    public function buildQuery($alias)
+    public function buildQuery()
     {
         $qb = clone($this->queryBuilder);
 
@@ -253,10 +251,10 @@ class ServerProcessService
      */
     public function getTotalRecords(QueryBuilder $qb, $alias)
     {
-        $qb->select("count({$alias}.id) as count")
+        $qb->select(array("count({$alias}.id)"))
             ->setMaxResults(1);
 
-        $rawResult = $qb->getQuery()->getArrayResults();
+        $rawResult = $qb->getQuery()->getArrayResult();
         return $rawResult[0]['count'];
     }
 
