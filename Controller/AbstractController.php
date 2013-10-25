@@ -74,7 +74,9 @@ abstract class AbstractController extends Controller
     protected function getDataByQueryBuilder(Request $request, QueryBuilder $qb, $dataFormatter = null)
     {
         $service = $this->get('data_tables.service');
-        $service->setRequest($request);
+        if ($service->getRequest() == null) {
+            $service->setRequest($request);
+        }
         $service->setQueryBuilder($qb);
 
         return $service->process($dataFormatter);

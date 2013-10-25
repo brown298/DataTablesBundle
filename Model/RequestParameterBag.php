@@ -261,7 +261,7 @@ class RequestParameterBag extends AbstractParamterBag
      */
     public function isColumnSortable($id)
     {
-        return ($this->getVarByName('sortLength', $id) == 'true');
+        return $this->getVarByName('sortCols', $id) != null;
     }
 
     /**

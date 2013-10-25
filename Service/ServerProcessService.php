@@ -52,6 +52,16 @@ class ServerProcessService
     }
 
     /**
+     * getRequest
+     *
+     * @return Request
+     */
+    public function getRequest()
+    {
+        return $this->request;
+    }
+
+    /**
      * setQueryBuilder
      *
      * @param QueryBuilder $queryBuilder]
@@ -189,8 +199,9 @@ class ServerProcessService
         $search = $this->requestParameters->getSearchColumns();
 
         foreach ($search as $name => $value) {
-            $qb->andWhere("{$name} LIKE :{$name}")
-                ->setParameter($name, '%' . $value . '%');
+            $paramName = str_replace('.','_',$name);
+            $qb->andWhere("{$name} LIKE :{$paramName}")
+                ->setParameter($paramName, '%' . $value . '%');
         }
 
         return $qb;
