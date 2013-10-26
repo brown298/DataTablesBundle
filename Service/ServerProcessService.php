@@ -220,7 +220,9 @@ class ServerProcessService
         $order = $this->requestParameters->getSortingColumns();
 
         foreach ($order as $sort=>$order) {
-            $qb->addOrderBy($sort, $order);
+            if (strlen($sort) > 0) {
+                $qb->addOrderBy($sort, $order);
+            }
         }
 
         return $qb;
@@ -257,7 +259,7 @@ class ServerProcessService
         if ($limit > 0) {
             $qb->setMaxResults($this->requestParameters->getDisplayLength());
         }
-        
+
         return $qb;
     }
 

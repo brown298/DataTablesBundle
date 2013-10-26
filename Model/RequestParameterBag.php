@@ -247,7 +247,11 @@ class RequestParameterBag extends AbstractParamterBag
         $currCol = $this->getVarByName('sortCols', $id);
         $cols    = array_keys($columns);
 
-        return $cols[$currCol];
+        if (!empty ($cols[$currCol])) {
+            return $cols[$currCol];
+        }
+
+        return null;
     }
 
     /**
