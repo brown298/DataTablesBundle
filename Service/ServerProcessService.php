@@ -235,7 +235,10 @@ class ServerProcessService
      */
     public function addOffset(QueryBuilder $qb)
     {
-        $qb->setFirstResult($this->requestParameters->getOffset());
+        $offset = $this->requestParameters->getOffset();
+        if ($offset > 0) {
+            $qb->setFirstResult($this->requestParameters->getOffset());
+        }
 
         return $qb;
     }
@@ -250,8 +253,11 @@ class ServerProcessService
      */
     public function addLimits(QueryBuilder $qb)
     {
-        $qb->setMaxResults($this->requestParameters->getDisplayLength());
-
+        $limit = $this->requestParameters->getDisplayLength();
+        if ($limit > 0) {
+            $qb->setMaxResults($this->requestParameters->getDisplayLength());
+        }
+        
         return $qb;
     }
 
