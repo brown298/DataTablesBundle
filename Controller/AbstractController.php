@@ -16,6 +16,12 @@ use Symfony\Component\HttpFoundation\Request;
  */
 abstract class AbstractController extends Controller
 {
+    /**
+     * @var array
+     */
+    protected $columns = array(
+        'id' => 'Id',
+    );
 
     /**
      * getData
@@ -78,6 +84,7 @@ abstract class AbstractController extends Controller
             $service->setRequest($request);
         }
         $service->setQueryBuilder($qb);
+        $service->setColumns($this->columns);
 
         return $service->process($dataFormatter);
     }

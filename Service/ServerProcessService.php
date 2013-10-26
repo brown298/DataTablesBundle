@@ -218,7 +218,6 @@ class ServerProcessService
     public function addOrder(QueryBuilder $qb)
     {
         $order = $this->requestParameters->getSortingColumns();
-
         foreach ($order as $sort=>$order) {
             if (strlen($sort) > 0) {
                 $qb->addOrderBy($sort, $order);
