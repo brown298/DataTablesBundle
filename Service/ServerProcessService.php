@@ -196,17 +196,26 @@ class ServerProcessService
      */
     public function addSearch(QueryBuilder $qb)
     {
-        $search = $this->requestParameters->getSearchColumns();
-        if (count($search) > 0) {
-            $qb->andWhere('(0=1');
-            foreach ($search as $name => $value) {
+        $search      = $this->requestParameters->getSearchColumns();
+        $query       = '';
+        $queryParams = array();
+        foreach ($search as $name => $value) {
+            if (strlen($value) > 0) {
                 $paramName = str_replace('.','_',$name);
-                $qb->orWhere("{$name} LIKE :{$paramName}")
-                    ->setParameter($paramName, '%' . $value . '%');
+                if (strlen($query) > 0) {
+                    $query .= ' or ';
+                }
+                $query .= "{$name} LIKE :{$paramName}";
+                $queryParams[$paramName] = '%' . $value . '%';
             }
-            $qb->andWhere('1=1)');
         }
-
+        if (strlen($query) > 0) {
+            $qb->andWhere($query);
+            foreach ($queryParams as $name => $value) {
+                $qb->setParameter($name, $value);
+            }
+        }
+        
         return $qb;
     }
 
@@ -282,7 +291,7 @@ class ServerProcessService
             ->setMaxResults(1);
 
         $rawResult = $qb->getQuery()->getArrayResult();
-        
+
         return array_pop($rawResult[0]);
     }
 
