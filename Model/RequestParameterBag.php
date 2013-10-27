@@ -185,7 +185,12 @@ class RequestParameterBag extends AbstractParamterBag
      */
     public function hasColumnSearch($i)
     {
-        return $this->getVarByName('searchCols', $i) !== null;
+        if ($this->isSearchable($i)) {
+            $search = $this->getVarByName('searchCols', $i);
+            return strlen($search) > 0;
+        }
+
+        return false;
     }
 
     /**
