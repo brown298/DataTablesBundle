@@ -84,7 +84,9 @@ abstract class AbstractController extends Controller
             $service->setRequest($request);
         }
         $service->setQueryBuilder($qb);
-        $service->setColumns($this->columns);
+        if ($service->getColumns() == null) {
+            $service->setColumns($this->columns);
+        }
 
         return $service->process($dataFormatter);
     }
