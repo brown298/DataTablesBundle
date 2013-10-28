@@ -16,7 +16,7 @@
             {% if params['fnServerData'] is defined %}
                 "fnServerData": {{ params['fnServerData']|raw }},
             {% endif %}
-            {% if params['aoColumnDefs'] %}
+            {% if params['aoColumnDefs'] is defined %}
                 "aoColumnDefs": {{ params['aoColumnDefs']|json_encode|raw }},
             {% endif %}
             'true': true
