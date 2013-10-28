@@ -25,6 +25,11 @@ class ServerProcessServiceTest extends AbstractBaseTest
     protected $request;
 
     /**
+     * @var Brown298\DataTablesBundle\Model\RequestParameterBag
+     */
+    protected $requestParameters;
+
+    /**
      * @var \Brown298\DataTablesBundle\Service\ServerProcessService
      */
     protected $service;
@@ -35,8 +40,12 @@ class ServerProcessServiceTest extends AbstractBaseTest
     public function setUp()
     {
         parent::setUp();
-        $this->service = new ServerProcessService();
-        $this->request = Phake::mock('\Symfony\Component\HttpFoundation\Request');
+
+        $this->service           = new ServerProcessService();
+        $this->request           = Phake::mock('\Symfony\Component\HttpFoundation\Request');
+        $this->queryBuilder      = Phake::mock('Doctrine\ORM\QueryBuilder');
+        $this->requestParameters = Phake::mock('Brown298\DataTablesBundle\Model\RequestParameterBag');
+
         $this->service->setRequest($this->request);
     }
 
@@ -92,6 +101,69 @@ class ServerProcessServiceTest extends AbstractBaseTest
     {
         $this->service->addColumn('test','123');
         $this->assertEquals(array('test'=>'123'), $this->service->getColumns());
+    }
+
+    /**
+     * testAddOrderNoSortingDoesNothing
+     */
+    public function testAddOrderNoSortingDoesNothing()
+    {
+        $this->assertEquals($this->queryBuilder, $this->service->addOrder($this->queryBuilder));
+    }
+
+    /**
+     * testAddOrderWithSortingAddsToQueryBuilder
+     */
+    public function testAddOrderWithSortingAddsToQueryBuilder()
+    {
+        $this->setProtectedValue($this->service, 'requestParameters', $this->requestParameters);
+        Phake::when($this->requestParameters)->getSortingColumns()->thenReturn(array('test'=> 'asc'));
+
+        $this->service->addOrder($this->queryBuilder);
+
+        Phake::verify($this->queryBuilder)->addOrderBy('test','asc');
+    }
+
+    /**
+     * testAddOffsetEmptyDoesNothing
+     */
+    public function testAddOffsetEmptyDoesNothing()
+    {
+        $this->assertEquals($this->queryBuilder, $this->service->addOffset($this->queryBuilder));
+    }
+
+    /**
+     * testAddOffsetAddsToQueryBuilder
+     */
+    public function testAddOffsetAddsToQueryBuilder()
+    {
+        $this->setProtectedValue($this->service, 'requestParameters', $this->requestParameters);
+        Phake::when($this->requestParameters)->getOffset()->thenReturn(2);
+
+        $this->service->addOffset($this->queryBuilder);
+
+        Phake::verify($this->queryBuilder)->setFirstResult(2);
+    }
+
+    /**
+     * testAddLimitsEmptyDoesNothing
+     */
+    public function testAddLimitsEmptyDoesNothing()
+    {
+        $this->assertEquals($this->queryBuilder, $this->service->addLimits($this->queryBuilder));
+    }
+
+    /**
+     * testAddLimitAddsToQueryBuilder
+     */
+    public function testAddLimitAddsToQueryBuilder()
+    {
+        $this->setProtectedValue($this->service, 'requestParameters', $this->requestParameters);
+        Phake::when($this->requestParameters)->getDisplayLength()->thenReturn(2);
+
+        $this->service->addLimits($this->queryBuilder);
+
+        Phake::verify($this->queryBuilder)->setMaxResults(2);
     }
 
 }

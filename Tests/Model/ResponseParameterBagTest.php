@@ -121,4 +121,17 @@ class ResponseParameterBagTest extends AbstractBaseTest
         $this->assertEquals($value, $results[$name]);
     }
 
+    /**
+     * testGetVarByNameNonExisting
+     */
+    public function testGetVarByNameNonExisting()
+    {
+        $this->assertNull($this->model->getVarByName('asdf'));
+    }
+
+    public function testGetVarByNameConstExisting()
+    {
+        $this->setProtectedValue($this->model,'parameterNames', array('asdf'=> array()));
+        $this->assertNull($this->model->getVarByName('asdf'));
+    }
 }

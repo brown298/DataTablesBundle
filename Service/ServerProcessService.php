@@ -268,7 +268,7 @@ class ServerProcessService
     {
         $limit = $this->requestParameters->getDisplayLength();
         if ($limit > 0) {
-            $qb->setMaxResults($this->requestParameters->getDisplayLength());
+            $qb->setMaxResults($limit);
         }
 
         return $qb;
