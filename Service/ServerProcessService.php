@@ -215,7 +215,7 @@ class ServerProcessService
                 $qb->setParameter($name, $value);
             }
         }
-        
+
         return $qb;
     }
 
