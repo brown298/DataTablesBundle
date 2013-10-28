@@ -12,7 +12,7 @@ use Doctrine\ORM\QueryBuilder;
  * handles the server side processing
  *
  * @package Brown298\DataTablesBundle\Service
- * @author  John Brown <john.brown@partnerweekly.com>
+ * @author  John Brown <brown.john@gmail.com>
  */
 class ServerProcessService
 {

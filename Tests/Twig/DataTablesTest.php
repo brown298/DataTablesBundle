@@ -97,4 +97,22 @@ class DataTablesTest extends AbstractBaseTest
         $this->assertInstanceOf('Twig_Function_Method', $results['addDataTable']);
     }
 
+    /**
+     * testAddDataTable
+     */
+    public function testAddDataTable()
+    {
+        $columns = array();
+        $params  = null;
+
+        $this->service->initRuntime($this->environment);
+        $this->service->addDataTable($columns, $params);
+        $resultParams = $this->getProtectedValue($this->service, 'params');
+
+        $this->assertArrayHasKey('table_template', $resultParams);
+        $this->assertArrayHasKey('script_template', $resultParams);
+        $this->assertArrayHasKey('path', $resultParams);
+    }
+
+
 } 

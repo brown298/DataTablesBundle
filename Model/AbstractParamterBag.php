@@ -51,6 +51,24 @@ abstract class AbstractParamterBag extends ParameterBag
     }
 
     /**
+     * setVarByNameId
+     *
+     * @param string $name
+     * @param mixed $id
+     * @param mixed $value
+     */
+    public function setVarByNameId($name, $id, $value)
+    {
+        $const = $this->parameterNames[$name]['const'];
+
+        if (stripos($const, '%') != false) {
+            $const = sprintf($const, $id);
+        }
+
+        $this->set($const, $value);
+    }
+
+    /**
      * setVarByName
      *
      * @param string $name

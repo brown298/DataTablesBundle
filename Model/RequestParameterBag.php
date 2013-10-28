@@ -100,6 +100,14 @@ class RequestParameterBag extends AbstractParamterBag
     }
 
     /**
+     * @param $echo
+     */
+    public function setEcho($echo)
+    {
+        $this->setVarByName('echo', $echo);
+    }
+
+    /**
      * addColumn
      */
     public function addColumn($name, $title)
@@ -226,6 +234,17 @@ class RequestParameterBag extends AbstractParamterBag
     }
 
     /**
+     * setSortingDierction
+     *
+     * @param $direction
+     * @param $id
+     */
+    public function setSortingDirection($direction, $id)
+    {
+        $this->setVarByNameId('sortDir', $id, $direction);
+    }
+
+    /**
      * getSortingDirection
      *
      * @param integer $id
@@ -274,6 +293,17 @@ class RequestParameterBag extends AbstractParamterBag
     }
 
     /**
+     * setSortingLength
+     *
+     * @param $length
+     */
+    public function setSortingLength($length)
+    {
+        $this->setVarByName('sortLength', $length);
+    }
+
+
+    /**
      * getSortingLength
      *
      * gets the count of elements being sorted on
@@ -286,6 +316,16 @@ class RequestParameterBag extends AbstractParamterBag
     }
 
     /**
+     * setOffset
+     *
+     * @param $offset
+     */
+    public function setOffset($offset)
+    {
+        $this->setVarByName('offset', $offset);
+    }
+
+    /**
      * getOffset
      *
      * gets the offset from the start of the pages
@@ -294,7 +334,17 @@ class RequestParameterBag extends AbstractParamterBag
      */
     public function getOffset()
     {
-        return $this->getVarByName('offset');
+        return intval($this->getVarByName('offset'));
+    }
+
+    /**
+     * setDisplayLength
+     *
+     * @param $length
+     */
+    public function setDisplayLength($length)
+    {
+        $this->setVarByName('length', $length);
     }
 
     /**
@@ -306,7 +356,7 @@ class RequestParameterBag extends AbstractParamterBag
      */
     public function getDisplayLength()
     {
-        return $this->getVarByName('length');
+        return intval($this->getVarByName('length'));
     }
 
     /**

@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * Class AbstractController
  * @package Brown298\DataTablesBundle\Controller
- * @author  John Brown <john.brown@partnerweekly.com>
+ * @author  John Brown <brown.john@gmail.com>
  */
 abstract class AbstractController extends Controller
 {

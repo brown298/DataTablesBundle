@@ -92,7 +92,7 @@ class ResponseParameterBag extends AbstractParamterBag
      */
     public function getTotal()
     {
-        return $this->getVarByName('total');
+        return intval($this->getVarByName('total'));
     }
 
 
