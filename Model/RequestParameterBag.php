@@ -180,7 +180,7 @@ class RequestParameterBag extends AbstractParamterBag
      * @return bool
      */
     public function isSearchable($i)
-    {
+            {
         return $this->getVarByName('searchable', $i) == 'true';
     }
 

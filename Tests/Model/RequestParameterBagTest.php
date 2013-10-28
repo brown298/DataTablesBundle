@@ -25,14 +25,20 @@ class RequestParameterBagTest extends AbstractBaseTest
     protected $model;
 
     /**
+     * @var Symfony\Component\HttpFoundation\ParameterBag
+     */
+    protected $parameterBag;
+
+    /**
      * setUp
      */
     public function setUp()
     {
         parent::setUp();
 
-        $this->request = Phake::mock('Symfony\Component\HttpFoundation\Request');
-        $this->model   = new RequestParameterBag();
+        $this->request      = Phake::mock('Symfony\Component\HttpFoundation\Request');
+        $this->parameterBag = Phake::mock('Symfony\Component\HttpFoundation\ParameterBag');
+        $this->model        = new RequestParameterBag();
     }
 
     /**
@@ -43,6 +49,39 @@ class RequestParameterBagTest extends AbstractBaseTest
         $this->model->setColumns(array());
         $this->assertEquals(array(), $this->model->getColumns());
     }
+
+    /**
+     * testFromRequestGet
+     */
+    public function testFromRequestGet()
+    {
+        $expectedResults = array('tst'=>'123');
+        Phake::when($this->request)->getMethod()->thenReturn('GET');
+        Phake::when($this->parameterBag)->all()->thenReturn($expectedResults);
+        $this->request->query = $this->parameterBag;
+
+        $this->model->fromRequest($this->request);
+
+        $this->assertEquals($expectedResults, $this->getProtectedValue($this->model, 'parameters'));
+        Phake::verify($this->parameterBag)->all();
+    }
+
+    /**
+     * testFromRequestPost
+     */
+    public function testFromRequestPost()
+    {
+        $expectedResults = array('tst'=>'123');
+        Phake::when($this->request)->getMethod()->thenReturn('POST');
+        Phake::when($this->parameterBag)->all()->thenReturn($expectedResults);
+        $this->request->request = $this->parameterBag;
+
+        $this->model->fromRequest($this->request);
+
+        $this->assertEquals($expectedResults, $this->getProtectedValue($this->model, 'parameters'));
+        Phake::verify($this->parameterBag)->all();
+    }
+
 
     /**
      * testGetSetColumnsValue
@@ -63,8 +102,8 @@ class RequestParameterBagTest extends AbstractBaseTest
     }
 
     /**
-     * testGetSetEcho
-     */
+ * testGetSetEcho
+ */
     public function testGetSetEcho()
     {
         $echo = 'test';
@@ -164,4 +203,129 @@ class RequestParameterBagTest extends AbstractBaseTest
         $this->model->setDisplayLength($length);
         $this->assertEquals($result, $this->model->getCurrentPage());
     }
+
+    /**
+     * testIsSearchableEmpty
+     */
+    public function testIsSearchableEmpty()
+    {
+        $this->assertFalse($this->model->isSearchable(20));
+    }
+
+    /**
+     * testIsSearchable
+     */
+    public function testIsSearchable()
+    {
+        $this->callProtected($this->model,'setVarByNameId', array('searchable', 2, 'true'));
+        $this->assertTrue($this->model->isSearchable(2));
+    }
+
+    /**
+     * testIsColumnSortableFalse
+     */
+    public function testIsColumnSortableFalse()
+    {
+        $this->assertFalse($this->model->isColumnSortable(20));
+    }
+
+    /**
+     * testIsColumnSortableTrue
+     */
+    public function testIsColumnSortableTrue()
+    {
+        $this->callProtected($this->model,'setVarByNameId', array('sortCols', 2, 'true'));
+        $this->assertTrue($this->model->isColumnSortable(2));
+    }
+
+    /**
+     * testGetColumnSearch
+     */
+    public function testGetColumnSearch()
+    {
+        $this->callProtected($this->model,'setVarByNameId', array('searchCols', 2, 'test'));
+        $this->assertEquals('test',$this->model->getColumnSearch(2));
+    }
+
+    /**
+     * testHasColumnSearchFalse
+     */
+    public function testHasColumnSearchFalse()
+    {
+        $this->assertFalse($this->model->hasColumnSearch(1));
+    }
+
+    /**
+     * testHasColumnSearchFalseSearchable
+     */
+    public function testHasColumnSearchFalseSearchable()
+    {
+        $this->callProtected($this->model,'setVarByNameId', array('searchable', 2, 'true'));
+        $this->assertFalse($this->model->hasColumnSearch(2));
+    }
+
+    /**
+     * testHasColumnSearchTrue
+     */
+    public function testHasColumnSearchTrue()
+    {
+        $this->callProtected($this->model,'setVarByNameId', array('searchable', 2, 'true'));
+        $this->callProtected($this->model,'setVarByNameId', array('searchCols', 2, 'test'));
+        $this->assertTrue($this->model->hasColumnSearch(2));
+    }
+
+    /**
+     * testGetSortingColumnNull
+     */
+    public function testGetSortingColumnNull()
+    {
+        $this->assertEquals(null, $this->model->getSortingColumn(3));
+    }
+
+    /**
+     * testGetSortingColumnValue
+     */
+    public function testGetSortingColumnValue()
+    {
+        $columns = array('test' => '123');
+        $this->model->setColumns($columns);
+        $this->callProtected($this->model,'setVarByNameId', array('sortCols', 2, 0));
+        $this->assertEquals('test', $this->model->getSortingColumn(2));
+    }
+
+    /**
+     * testGetSortingColumnsEmpty
+     */
+    public function testGetSortingColumnsEmpty()
+    {
+        $this->assertEquals(array(), $this->model->getSortingColumns());
+    }
+
+    /**
+     * testGetSortingColumnNotSortable
+     */
+    public function testGetSortingColumnNotSortable()
+    {
+        $this->model->setSortingLength(1);
+        $this->assertEquals(array(), $this->model->getSortingColumns());
+    }
+
+    /**
+     * testGetSortingColumns
+     */
+    public function testGetSortingColumns()
+    {
+        $this->model->setSortingLength(1);
+        $this->callProtected($this->model,'setVarByNameId', array('sortCols', 0, 'true'));
+        $this->assertEquals(array('' => 'asc'), $this->model->getSortingColumns());
+    }
+
+    /**
+     * testGetSearchColumnsEmpty
+     */
+    public function testGetSearchColumnsEmpty()
+    {
+        $this->assertEquals(array(), $this->model->getSearchColumns());
+    }
+
 }

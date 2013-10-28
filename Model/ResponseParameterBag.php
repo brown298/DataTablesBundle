@@ -67,6 +67,17 @@ class ResponseParameterBag extends AbstractParamterBag
     }
 
     /**
+     * setEcho
+     *
+     * @param $echo
+     */
+    public function setEcho($echo)
+    {
+        $this->setVarByName('echo', $echo);
+    }
+
+    /**
+     * getEcho
      *
      * @return mixed
      */

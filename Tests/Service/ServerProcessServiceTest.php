@@ -36,6 +36,8 @@ class ServerProcessServiceTest extends AbstractBaseTest
     {
         parent::setUp();
         $this->service = new ServerProcessService();
+        $this->request = Phake::mock('\Symfony\Component\HttpFoundation\Request');
+        $this->service->setRequest($this->request);
     }
 
     /**
@@ -61,10 +63,35 @@ class ServerProcessServiceTest extends AbstractBaseTest
      */
     public function testGetSetRequest()
     {
-        $this->request = Phake::mock('\Symfony\Component\HttpFoundation\Request');
-        $this->service->setRequest($this->request);
-
         $this->assertEquals($this->request, $this->service->getRequest());
         $this->assertInstanceOf('\Brown298\DataTablesBundle\Model\RequestParameterBag', $this->service->getRequestParameters());
     }
+
+    /**
+     * testGetSetColumnsEmpty
+     */
+    public function testGetSetColumnsEmpty()
+    {
+        $this->service->setColumns(array());
+        $this->assertEquals(array(), $this->service->getColumns());
+    }
+
+    /**
+     * testGetSetColumnsValue
+     */
+    public function testGetSetColumnsValue()
+    {
+        $this->service->setColumns(array('test'));
+        $this->assertEquals(array('test'), $this->service->getColumns());
+    }
+
+    /**
+     * testAddColumn
+     */
+    public function testAddColumn()
+    {
+        $this->service->addColumn('test','123');
+        $this->assertEquals(array('test'=>'123'), $this->service->getColumns());
+    }
+
 }
