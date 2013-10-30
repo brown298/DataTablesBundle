@@ -38,6 +38,7 @@ abstract class AbstractController extends Controller
     {
         if ($this->dataTable == null) {
             $this->dataTable = new EmptyDataTable();
+            $this->dataTable->setContainer($this->container);
         }
 
         return $this->dataTable->getData($request);
@@ -54,6 +55,7 @@ abstract class AbstractController extends Controller
      {
          if ($this->dataTable == null) {
              $this->dataTable = new EmptyDataTable();
+             $this->dataTable->setContainer($this->container);
          }
 
          return $this->dataTable->getQueryBuilder($request);
@@ -71,6 +73,7 @@ abstract class AbstractController extends Controller
     public function dataAction(Request $request, $dataFormatter = null)
     {
         $this->dataTable = new EmptyDataTable();
+        $this->dataTable->setContainer($this->container);
         $this->dataTable->setColumns($this->colunns);
         $this->dataTable->setQueryBuilder($this->getQueryBuilder($request));
         return $this->dataTable->getJsonResponse($request, $dataFormatter);

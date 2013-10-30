@@ -138,14 +138,16 @@ abstract class AbstractDataTable implements DataTableInterface, ContainerAwareIn
      *
      * @return JsonResponse
      */
-    public function getJsonResponse(Request $request, callable $dataFormatter = null)
+    public function getJsonResponse(Request $request, \Closure $dataFormatter = null)
     {
-        $qb = ($this->queryBuilder = null) ? $this->queryBuilder : $this->getQueryBuilder($request);
+        $qb = ($this->queryBuilder == null) ? $this->queryBuilder : $this->getQueryBuilder($request);
+
         if ($qb !== null) {
             $data = $this->getDataByQueryBuilder($request, $qb, $dataFormatter);
         } else {
             $data = $this->getData($request);
         }
+
         return new JsonResponse($data);
     }
 
@@ -167,7 +169,7 @@ abstract class AbstractDataTable implements DataTableInterface, ContainerAwareIn
     /**
      * {@inheritDoc}
      */
-    public function processRequest(Request $request, callable $dataFormatter = null)
+    public function processRequest(Request $request, \Closure $dataFormatter = null)
     {
         if (!$this->isAjaxRequest($request)) {
             return false;
@@ -184,7 +186,7 @@ abstract class AbstractDataTable implements DataTableInterface, ContainerAwareIn
      * @param callable|null $dataFormatter
      * @return mixed|void
      */
-    public function setDataFormatter(callable $dataFormatter = null)
+    public function setDataFormatter(\Closure $dataFormatter = null)
     {
         $this->dataFormatter = $dataFormatter;
     }
