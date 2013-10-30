@@ -51,7 +51,9 @@ abstract class AbstractDataTable implements DataTableInterface, ContainerAwareIn
     public function __construct(EntityManager $em = null, array $columns = null)
     {
         $this->em      = $em;
-        $this->columns = $columns;
+        if ($columns !== null) {
+            $this->columns = $columns;
+        }
     }
 
     /**
@@ -93,6 +95,7 @@ abstract class AbstractDataTable implements DataTableInterface, ContainerAwareIn
         if ($service->getRequest() == null) {
             $service->setRequest($request);
         }
+
         $service->setQueryBuilder($qb);
         if ($service->getColumns() == null) {
             $service->setColumns($this->columns);
@@ -140,7 +143,7 @@ abstract class AbstractDataTable implements DataTableInterface, ContainerAwareIn
      */
     public function getJsonResponse(Request $request, \Closure $dataFormatter = null)
     {
-        $qb = ($this->queryBuilder == null) ? $this->queryBuilder : $this->getQueryBuilder($request);
+        $qb = ($this->queryBuilder !== null) ? $this->queryBuilder : $this->getQueryBuilder($request);
 
         if ($qb !== null) {
             $data = $this->getDataByQueryBuilder($request, $qb, $dataFormatter);
@@ -175,8 +178,15 @@ abstract class AbstractDataTable implements DataTableInterface, ContainerAwareIn
             return false;
         }
 
-        if ($dataFormatter == null && $this->dataFormatter !== null) {
+        if ($dataFormatter !== null) {
             $dataFormatter = $this->dataFormatter;
+        } elseif ($this->getDataFormatter() !== null) {
+            $dataFormatter = $this->getDataFormatter();
+        }
+
+        // ensure at least a minimal formatter is used
+        if ($dataFormatter === null) {
+            $dataFormatter = function($data) { return $data; };
         }
 
         return $this->getJsonResponse($request, $dataFormatter);
