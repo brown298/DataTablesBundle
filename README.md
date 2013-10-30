@@ -7,7 +7,7 @@ Add the package brown298\datatables to your composer.json
 ```json
 {
     "require": {
-        "brown298\datatables": "dev-master"
+        "brown298/data-tables-bundle": "dev-master"
     }
 }
 ```
