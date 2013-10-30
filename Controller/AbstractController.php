@@ -18,6 +18,16 @@ use Symfony\Component\HttpFoundation\Request;
 abstract class AbstractController extends Controller
 {
     /**
+     * @var array
+     */
+    protected $colunns = array();
+
+    /**
+     * @var EmptyDataTable
+     */
+    protected $dataTable;
+
+    /**
      * getData
      *
      * @param \Symfony\Component\HttpFoundation\Request $request
@@ -26,8 +36,11 @@ abstract class AbstractController extends Controller
      */
     protected function getData(Request $request)
     {
-        $model = new EmptyDataTable();
-        return $model->getData($request);
+        if ($this->dataTable == null) {
+            $this->dataTable = new EmptyDataTable();
+        }
+
+        return $this->dataTable->getData($request);
     }
 
     /**
@@ -39,8 +52,11 @@ abstract class AbstractController extends Controller
      */
      protected function getQueryBuilder(Request $request)
      {
-         $model = new EmptyDataTable();
-         return $model->getQueryBuilder($request);
+         if ($this->dataTable == null) {
+             $this->dataTable = new EmptyDataTable();
+         }
+
+         return $this->dataTable->getQueryBuilder($request);
      }
 
     /**
@@ -54,8 +70,9 @@ abstract class AbstractController extends Controller
      */
     public function dataAction(Request $request, $dataFormatter = null)
     {
-        $model = new EmptyDataTable();
-        $model->setQueryBuilder($this->getQueryBuilder($request));
-        return $model->getJsonResponse($request, $dataFormatter);
+        $this->dataTable = new EmptyDataTable();
+        $this->dataTable->setColumns($this->colunns);
+        $this->dataTable->setQueryBuilder($this->getQueryBuilder($request));
+        return $this->dataTable->getJsonResponse($request, $dataFormatter);
     }
 }
