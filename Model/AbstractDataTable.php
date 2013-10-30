@@ -148,7 +148,7 @@ abstract class AbstractDataTable implements DataTableInterface, ContainerAwareIn
         if ($qb !== null) {
             $data = $this->getDataByQueryBuilder($request, $qb, $dataFormatter);
         } else {
-            $data = $this->getData($request);
+            $data = $this->getData($request, $dataFormatter);
         }
 
         return new JsonResponse($data);
