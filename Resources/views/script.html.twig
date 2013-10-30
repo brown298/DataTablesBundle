@@ -1,0 +1,26 @@
+<script type="text/javascript">
+    jQuery(document).ready(function() {
+        {% spaceless %}
+        jQuery('#{{ params['id'] }}').dataTable( {
+            "bProcessing":     {{ params['bProcessing']|raw }},
+            "bLengthChange":   {{ params['bLengthChange']|raw }},
+            "bFilter":         {{ params['bFilter']|raw }},
+            "sPaginationType": "{{ params['sPaginationType']|raw }}",
+            "bSort":           {{ params['bSort']|raw }},
+            "bInfo":           {{ params['bInfo']|raw }},
+            "bPaginate":       {{ params['bPaginate']|raw }},
+            {% if params['bServerSide'] %}
+                "bServerSide":     {{ params['bServerSide']|raw }},
+                "sAjaxSource":     "{{ params['path']|raw }}",
+            {% endif %}
+            {% if params['fnServerData'] is defined %}
+                "fnServerData": {{ params['fnServerData']|raw }},
+            {% endif %}
+            {% if params['aoColumnDefs'] is defined %}
+                "aoColumnDefs": {{ params['aoColumnDefs']|json_encode|raw }},
+            {% endif %}
+            'true': true
+        } );
+        {% endspaceless %}
+    } );
+</script>
