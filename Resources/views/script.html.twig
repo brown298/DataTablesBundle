@@ -16,7 +16,12 @@
             {% if params['fnServerData'] is defined %}
                 "fnServerData": {{ params['fnServerData']|raw }},
             {% endif %}
-            {% if params['aoColumnDefs'] is defined %}
+            {% if params['aaData'] is not null %}
+                "aaData": {{ params['aaData']|raw }},
+                {% if params['aoColumnDefs'] is defined %}
+                    "aoColumns": {{ params['aoColumnDefs']|json_encode|raw }},
+                {% endif %}
+            {% elseif params['aoColumnDefs'] is defined %}
                 "aoColumnDefs": {{ params['aoColumnDefs']|json_encode|raw }},
             {% endif %}
             'true': true
