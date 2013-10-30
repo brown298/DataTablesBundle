@@ -139,7 +139,9 @@ class ServerProcessService
     {
         $this->responseParameters = new ResponseParameterBag();
         $this->responseParameters->setRequest($this->requestParameters);
-        if ($this->data == null) {
+
+        // check if we are using a query builder or an array of data
+        if (!is_array($this->data)) {
             $qb      = $this->buildQuery();
             $aliases = $qb->getRootAliases();
             $alias   = $aliases[0];
@@ -199,6 +201,8 @@ class ServerProcessService
         $search      = $this->requestParameters->getSearchColumns();
         $query       = '';
         $queryParams = array();
+
+        // build what the parameters are
         foreach ($search as $name => $value) {
             if (strlen($value) > 0) {
                 $paramName = str_replace('.','_',$name);
@@ -209,6 +213,8 @@ class ServerProcessService
                 $queryParams[$paramName] = '%' . $value . '%';
             }
         }
+
+        // add the parameters
         if (strlen($query) > 0) {
             $qb->andWhere($query);
             foreach ($queryParams as $name => $value) {
@@ -250,7 +256,7 @@ class ServerProcessService
     {
         $offset = $this->requestParameters->getOffset();
         if ($offset > 0) {
-            $qb->setFirstResult($this->requestParameters->getOffset());
+            $qb->setFirstResult($offset);
         }
 
         return $qb;

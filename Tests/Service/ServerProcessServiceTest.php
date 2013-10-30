@@ -20,6 +20,11 @@ class ServerProcessServiceTest extends AbstractBaseTest
     protected $queryBuilder;
 
     /**
+     * @var \Doctrine\ORM\AbstractQuery
+     */
+    protected $query;
+
+    /**
      * @var \Symfony\Component\HttpFoundation\Request
      */
     protected $request;
@@ -44,6 +49,7 @@ class ServerProcessServiceTest extends AbstractBaseTest
         $this->service           = new ServerProcessService();
         $this->request           = Phake::mock('\Symfony\Component\HttpFoundation\Request');
         $this->queryBuilder      = Phake::mock('Doctrine\ORM\QueryBuilder');
+        $this->query             = Phake::mock('Doctrine\ORM\AbstractQuery');
         $this->requestParameters = Phake::mock('Brown298\DataTablesBundle\Model\RequestParameterBag');
 
         $this->service->setRequest($this->request);
@@ -164,6 +170,267 @@ class ServerProcessServiceTest extends AbstractBaseTest
         $this->service->addLimits($this->queryBuilder);
 
         Phake::verify($this->queryBuilder)->setMaxResults(2);
+    }
+
+    /**
+     * testGetResponseParameters
+     */
+    public function testGetResponseParameters()
+    {
+        $this->assertNull($this->service->getResponseParameters());
+
+        $responseParameters = Phake::mock('Brown298\DataTablesBundle\Model\ResponseParameterBag');
+        $this->setProtectedValue($this->service, 'responseParameters', $responseParameters);
+
+        $this->assertEquals($responseParameters, $this->service->getResponseParameters());
+    }
+
+    /**
+     * testAddSearchWithoutParameters
+     *
+     * test that the search without criteria returns the original querybuilder
+     */
+    public function testAddSearchWithoutParameters()
+    {
+        $results = $this->service->addSearch($this->queryBuilder);
+
+        $this->assertEquals($this->queryBuilder, $results);
+        Phake::verify($this->queryBuilder, Phake::never())->andWhere(Phake::anyParameters());
+    }
+
+    /**
+     * testAddSearchWithSingleParameter
+     *
+     * ensures a parameter gets added
+     */
+    public function testAddSearchWithSingleParameter()
+    {
+        $columns = array(
+            'a.id' => 'test',
+        );
+        Phake::when($this->requestParameters)->getSearchColumns()->thenReturn($columns);
+        $this->setProtectedValue($this->service,'requestParameters', $this->requestParameters);
+
+        $results = $this->service->addSearch($this->queryBuilder);
+
+        $this->assertEquals($this->queryBuilder, $results);
+        Phake::verify($this->queryBuilder)->andWhere('a.id LIKE :a_id');
+        Phake::verify($this->queryBuilder)->setParameter('a_id', '%test%');
+    }
+
+    /**
+     * testAddSearchWithMultipleParametersUsesOr
+     *
+     * ensures when multiple columns are being searched, they are or joined
+     */
+    public function testAddSearchWithMultipleParametersUsesOr()
+    {
+        $columns = array(
+            'a.id'   => 'test',
+            'b.name' => '123',
+        );
+        Phake::when($this->requestParameters)->getSearchColumns()->thenReturn($columns);
+        $this->setProtectedValue($this->service,'requestParameters', $this->requestParameters);
+
+        $results = $this->service->addSearch($this->queryBuilder);
+
+        $this->assertEquals($this->queryBuilder, $results);
+        Phake::verify($this->queryBuilder)->andWhere('a.id LIKE :a_id or b.name LIKE :b_name');
+        Phake::verify($this->queryBuilder)->setParameter('a_id', '%test%');
+        Phake::verify($this->queryBuilder)->setParameter('b_name', '%123%');
+    }
+
+    /**
+     * testGetTotalRecords
+     */
+    public function testGetTotalRecords()
+    {
+        $expectedResults = 2;
+        Phake::when($this->queryBuilder)->getQuery()->thenReturn($this->query);
+        Phake::when($this->queryBuilder)->select(Phake::anyParameters())->thenReturn($this->queryBuilder);
+        Phake::when($this->query)->getArrayResult()->thenReturn(array(array($expectedResults)));
+
+        $result = $this->service->getTotalRecords($this->queryBuilder, 's');
+        Phake::verify($this->queryBuilder)->select(array('count(s.id)'));
+        Phake::verify($this->queryBuilder)->setMaxResults(1);
+
+        $this->assertEquals($expectedResults, $result);
+    }
+
+    /**
+     * testParseColumnsEmptySelect
+     */
+    public function testParseColumnsEmptySelect()
+    {
+        $selects = array();
+        $this->setProtectedValue($this->service, 'requestParameters', $this->requestParameters);
+        Phake::when($this->queryBuilder)->getDQLPart('select')->thenReturn($selects);
+
+        $this->service->parseColumns($this->queryBuilder);
+
+        Phake::verify($this->requestParameters, Phake::never())->addColumn(Phake::anyParameters());
+    }
+
+    /**
+     * testParseColumnsWithSelectNoAs
+     *
+     * ensures that the query runs when the select does not contain an alias
+     */
+    public function testParseColumnsWithSelectNoAs()
+    {
+        $selects = array(
+            array('a.id'),
+        );
+        $this->setProtectedValue($this->service, 'requestParameters', $this->requestParameters);
+        Phake::when($this->queryBuilder)->getDQLPart('select')->thenReturn($selects);
+
+        $this->service->parseColumns($this->queryBuilder);
+
+        Phake::verify($this->requestParameters)->addColumn('a.id','a.id');
+    }
+
+    /**
+     * testParseColumnsWithSelectAs
+     */
+    public function testParseColumnsWithSelectAs()
+    {
+        $selects = array(
+            array('a.id as ai'),
+        );
+        $this->setProtectedValue($this->service, 'requestParameters', $this->requestParameters);
+        Phake::when($this->queryBuilder)->getDQLPart('select')->thenReturn($selects);
+
+        $this->service->parseColumns($this->queryBuilder);
+
+        Phake::verify($this->requestParameters)->addColumn('a.id','ai');
+    }
+
+    /**
+     * testSetQueryBuilder
+     */
+    public function testSetQueryBuilder()
+    {
+        Phake::when($this->queryBuilder)->getDQLPart('select')->thenReturn(array());
+        $this->service->setQueryBuilder($this->queryBuilder);
+
+        $this->assertEquals($this->queryBuilder, $this->getProtectedValue($this->service, 'queryBuilder'));
+
+        // ensure we parse the columsn
+        Phake::verify($this->queryBuilder)->getDQLPart('select');
+    }
+
+    /**
+     * testBuildQuery
+     */
+    public function testBuildQuery()
+    {
+        Phake::when($this->requestParameters)->getSortingColumns()->thenReturn(array());
+        Phake::when($this->requestParameters)->getSearchColumns()->thenReturn(array());
+        $this->setProtectedValue($this->service, 'requestParameters', $this->requestParameters);
+        $this->setProtectedValue($this->service, 'queryBuilder', $this->queryBuilder);
+        $result = $this->service->buildQuery();
+
+        $this->assertEquals($this->queryBuilder, $result);
+
+        // verify addSearch
+        Phake::verify($this->requestParameters)->getSearchColumns();
+
+        // verify addOrder
+        Phake::verify($this->requestParameters)->getSortingColumns();
+
+        // verify addOffset
+        Phake::verify($this->requestParameters)->getOffset();
+
+        // verify addLimits
+        Phake::verify($this->requestParameters)->getDisplayLength();
+    }
+
+    /**
+     * testProcessQueryBuilder
+     *
+     * test that the process works with a query builder
+     */
+    public function testProcessQueryBuilder()
+    {
+        $dataFormatter = null;
+        $this->setProtectedValue($this->service, 'queryBuilder', $this->queryBuilder);
+        Phake::when($this->queryBuilder)->select(Phake::anyParameters())->thenReturn($this->queryBuilder);
+        Phake::when($this->queryBuilder)->getQuery()->thenReturn($this->query);
+        Phake::when($this->query)->getArrayResult()->thenReturn(array())->thenReturn(array(array()));
+
+        $result = $this->service->process($dataFormatter);
+
+        $this->assertEquals(array(
+            'sEcho'                => null,
+            'iTotalRecords'        => null,
+            'iTotalDisplayRecords' => null,
+            'aaData'               => array(),
+        ), $result);
+    }
+
+    /**
+     * testProcessWithDataEmpty
+     */
+    public function testProcessWithDataEmpty()
+    {
+        $data          = array();
+        $dataFormatter = null;
+
+        $this->service->setData($data);
+        $result = $this->service->process($dataFormatter);
+
+        $this->assertEquals(array(
+            'sEcho'                => null,
+            'iTotalRecords'        => 0,
+            'iTotalDisplayRecords' => 0,
+            'aaData'               => array(),
+        ), $result);
+    }
+
+    /**
+     * testProcessWithData
+     */
+    public function testProcessWithData()
+    {
+        $data          = array('test');
+        $dataFormatter = null;
+        $this->setProtectedValue($this->service, 'requestParameters', $this->requestParameters);
+        Phake::when($this->requestParameters)->getDisplayLength()->thenReturn(10);
+
+        $this->service->setData($data);
+        $result = $this->service->process($dataFormatter);
+
+        $this->assertEquals(array(
+            'sEcho'                => null,
+            'iTotalRecords'        => 1,
+            'iTotalDisplayRecords' => 1,
+            'aaData'               => array('test'),
+        ), $result);
+    }
+
+    /**
+     * testProcessCallsFormatter
+     *
+     * ensure the formatting function gets called
+     */
+    public function testProcessCallsFormatter()
+    {
+        $data          = array('test');
+        $dataFormatter = function($data) {
+            return array('123');
+        };
+        $this->setProtectedValue($this->service, 'requestParameters', $this->requestParameters);
+        Phake::when($this->requestParameters)->getDisplayLength()->thenReturn(10);
+
+        $this->service->setData($data);
+        $result = $this->service->process($dataFormatter);
+
+        $this->assertEquals(array(
+            'sEcho'                => null,
+            'iTotalRecords'        => 1,
+            'iTotalDisplayRecords' => 1,
+            'aaData'               => array('123'),
+        ), $result);
     }
 
 }
