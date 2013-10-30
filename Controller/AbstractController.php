@@ -1,6 +1,7 @@
 <?php
 namespace Brown298\DataTablesBundle\Controller;
 
+use Brown298\DataTablesBundle\Model\EmptyDataTable;
 use Brown298\DataTablesBundle\Model\ResponseParameterBag;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -17,13 +18,6 @@ use Symfony\Component\HttpFoundation\Request;
 abstract class AbstractController extends Controller
 {
     /**
-     * @var array
-     */
-    protected $columns = array(
-        'id' => 'Id',
-    );
-
-    /**
      * getData
      *
      * @param \Symfony\Component\HttpFoundation\Request $request
@@ -32,7 +26,8 @@ abstract class AbstractController extends Controller
      */
     protected function getData(Request $request)
     {
-        return array();
+        $model = new EmptyDataTable();
+        return $model->getData($request);
     }
 
     /**
@@ -44,7 +39,8 @@ abstract class AbstractController extends Controller
      */
      protected function getQueryBuilder(Request $request)
      {
-        return null;
+         $model = new EmptyDataTable();
+         return $model->getQueryBuilder($request);
      }
 
     /**
@@ -58,36 +54,8 @@ abstract class AbstractController extends Controller
      */
     public function dataAction(Request $request, $dataFormatter = null)
     {
-        $qb = $this->getQueryBuilder($request);
-        if ($qb !== null) {
-            $data = $this->getDataByQueryBuilder($request, $qb, $dataFormatter);
-        } else {
-            $data = $this->getData($request);
-        }
-        return new JsonResponse($data);
-    }
-
-    /**
-     * getData
-     *
-     * @param Request      $request
-     * @param QueryBuilder $qb
-     *
-     * @param null         $dataFormatter
-     *
-     * @return JsonResponse
-     */
-    protected function getDataByQueryBuilder(Request $request, QueryBuilder $qb, $dataFormatter = null)
-    {
-        $service = $this->get('data_tables.service');
-        if ($service->getRequest() == null) {
-            $service->setRequest($request);
-        }
-        $service->setQueryBuilder($qb);
-        if ($service->getColumns() == null) {
-            $service->setColumns($this->columns);
-        }
-
-        return $service->process($dataFormatter);
+        $model = new EmptyDataTable();
+        $model->setQueryBuilder($this->getQueryBuilder($request));
+        return $model->getJsonResponse($request, $dataFormatter);
     }
 }
