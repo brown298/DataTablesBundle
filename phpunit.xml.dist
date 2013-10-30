@@ -14,9 +14,8 @@
         </testsuite>
     </testsuites>
     <filter>
-        <whitelist>
-            <exclude></exclude>
-            <directory></directory>
-        </whitelist>
+        <blacklist>
+            <directory>vendor</directory>
+        </blacklist>
     </filter>
 </phpunit>
