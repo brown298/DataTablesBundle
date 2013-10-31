@@ -9,6 +9,7 @@
             "bSort":           {{ params['bSort']|raw }},
             "bInfo":           {{ params['bInfo']|raw }},
             "bPaginate":       {{ params['bPaginate']|raw }},
+            "iDisplayLength":  {{ params['iDisplayLength']|raw }},
             {% if params['bServerSide'] %}
                 "bServerSide":     {{ params['bServerSide']|raw }},
                 "sAjaxSource":     "{{ params['path']|raw }}",

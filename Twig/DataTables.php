@@ -80,6 +80,7 @@ class DataTables extends \Twig_Extension
                 'bInfo'           => 0,
                 'bPaginate'       => 1,
                 'path'            => '',
+                'iDisplayLength'  => -1,
                 'table_class'     => 'display dataTable table table-striped',
                 'aaData'          => null,
             ),
