@@ -163,4 +163,71 @@ class EmptyDataTableTest extends AbstractBaseTest
         Phake::verify($this->dataTablesService)->setColumns(array());
     }
 
+    /**
+     * testGetJsonResponseNullFormatter
+     */
+    public function testGetJsonResponseNullFormatter()
+    {
+        $result = $this->dataTable->getJsonResponse($this->request);
+
+        $this->assertInstanceOf('Symfony\Component\HttpFoundation\JsonResponse', $result);
+    }
+
+    /**
+     * testGetJsonResponseQBNullFormatter
+     */
+    public function testGetJsonResponseQBNullFormatter()
+    {
+        $this->dataTable->setQueryBuilder($this->queryBuilder);
+        $this->dataTable->setContainer($this->container);
+        Phake::when($this->container)->get(Phake::anyParameters())->thenReturn($this->dataTablesService);
+
+        $result = $this->dataTable->getJsonResponse($this->request);
+
+        $this->assertInstanceOf('Symfony\Component\HttpFoundation\JsonResponse', $result);
+    }
+
+    /**
+     * testProcessRequestNonAjax
+     */
+    public function testProcessRequestNonAjax()
+    {
+        $this->assertFalse($this->dataTable->processRequest($this->request));
+    }
+
+    /**
+     * testProcessRequestNullDataFormatter
+     */
+    public function testProcessRequestNullDataFormatter()
+    {
+        Phake::when($this->request)->isXmlHttpRequest()->thenReturn(true);
+
+        $result = $this->dataTable->processRequest($this->request);
+
+        $this->assertInstanceOf('Symfony\Component\HttpFoundation\JsonResponse', $result);
+    }
+
+    /**
+     * testProcessRequestDataFormatter
+     */
+    public function testProcessRequestDataFormatter()
+    {
+        Phake::when($this->request)->isXmlHttpRequest()->thenReturn(true);
+        $result = $this->dataTable->processRequest($this->request, function ($data){});
+
+        $this->assertInstanceOf('Symfony\Component\HttpFoundation\JsonResponse', $result);
+    }
+
+    /**
+     * testProcessRequestDataFormatter
+     */
+    public function testProcessRequestGetDataFormatter()
+    {
+        Phake::when($this->request)->isXmlHttpRequest()->thenReturn(true);
+        $this->setProtectedValue($this->dataTable,'dataFormatter',function ($data){});
+        
+        $result = $this->dataTable->processRequest($this->request);
+
+        $this->assertInstanceOf('Symfony\Component\HttpFoundation\JsonResponse', $result);
+    }
 }
