@@ -83,6 +83,8 @@ interface DataTableInterface
     public function getDataFormatter();
 
     /**
+     * getEm
+     *
      * @return mixed
      */
     public function getEm();
@@ -92,4 +94,16 @@ interface DataTableInterface
      * @return mixed
      */
     public function setEm(EntityManager $em);
+
+    /**
+     * execute
+     *
+     * runs the server process and sends the resulting data to the formatter
+     *
+     * @param $service
+     * @param $formatter
+     *
+     * @return mixed
+     */
+    public function execute($service, $formatter);
 }
