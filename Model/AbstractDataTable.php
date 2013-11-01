@@ -84,7 +84,6 @@ abstract class AbstractDataTable implements DataTableInterface, ContainerAwareIn
      *
      * @param Request      $request
      * @param QueryBuilder $qb
-     *
      * @param null         $dataFormatter
      *
      * @return JsonResponse
@@ -92,6 +91,9 @@ abstract class AbstractDataTable implements DataTableInterface, ContainerAwareIn
     protected function getDataByQueryBuilder(Request $request, QueryBuilder $qb, $dataFormatter = null)
     {
         $service = $this->container->get('data_tables.service');
+        $logger  = $this->container->get('logger');
+        $service->setLogger($logger);
+
         if ($service->getRequest() == null) {
             $service->setRequest($request);
         }
@@ -101,7 +103,18 @@ abstract class AbstractDataTable implements DataTableInterface, ContainerAwareIn
             $service->setColumns($this->columns);
         }
 
-        return $service->process($dataFormatter);
+        return $this->execute($service, $dataFormatter);
+    }
+
+    /**
+     * execute
+     *
+     * @param $service
+     * @param $formatter
+     */
+    public function execute($service, $formatter)
+    {
+        return $service->process($formatter, false);
     }
 
     /**

@@ -79,10 +79,11 @@ class DataTables extends \Twig_Extension
                 'sPaginationType' => 'full_numbers',
                 'bInfo'           => 0,
                 'bPaginate'       => 1,
-                'path'            => '',
+                'path'            => '#',
                 'iDisplayLength'  => -1,
                 'table_class'     => 'display dataTable table table-striped',
                 'aaData'          => null,
+                'twigVars'        => array(),
             ),
             $params
         );
@@ -97,10 +98,11 @@ class DataTables extends \Twig_Extension
      */
     public function renderJs()
     {
-        return $this->environment->render($this->params['script_template'], array(
+        $args = array_merge($this->params['twigVars'], array(
                 'columns' => $this->columns,
                 'params'  => $this->params,
             ));
+        return $this->environment->render($this->params['script_template'], $args);
     }
 
     /**
@@ -110,10 +112,11 @@ class DataTables extends \Twig_Extension
      */
     public function renderTable()
     {
-        return $this->environment->render($this->params['table_template'], array(
+        $args = array_merge($this->params['twigVars'], array(
                 'columns' => $this->columns,
                 'params'  => $this->params,
-            ));
+        ));
+        return $this->environment->render($this->params['table_template'], $args);
     }
 
     /**

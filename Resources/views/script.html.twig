@@ -1,7 +1,8 @@
 <script type="text/javascript">
+    var {{ params['id'] }}_dataTable = {};
     jQuery(document).ready(function() {
         {% spaceless %}
-        jQuery('#{{ params['id'] }}').dataTable( {
+        {{ params['id'] }}_dataTable = jQuery('#{{ params['id'] }}').dataTable( {
             "bProcessing":     {{ params['bProcessing']|raw }},
             "bLengthChange":   {{ params['bLengthChange']|raw }},
             "bFilter":         {{ params['bFilter']|raw }},
@@ -10,12 +11,16 @@
             "bInfo":           {{ params['bInfo']|raw }},
             "bPaginate":       {{ params['bPaginate']|raw }},
             "iDisplayLength":  {{ params['iDisplayLength']|raw }},
+            {% if params['path']|length > 0 %}
+                "sAjaxSource":     "{{ params['path']|raw }}",
+            {% endif %}
             {% if params['bServerSide'] %}
                 "bServerSide":     {{ params['bServerSide']|raw }},
-                "sAjaxSource":     "{{ params['path']|raw }}",
             {% endif %}
             {% if params['fnServerData'] is defined %}
                 "fnServerData": {{ params['fnServerData']|raw }},
+            {% elseif params['customSearchForm'] is defined %}
+                'fnServerData': 'function ( sSource, aoData, fnCallback ) { var searchValues = jQuery("{{ params['customSearchForm'] }}").serializeArray(); for ( var i=0; i < searchValues.length; i++) { aoData.push(searchValues[i]); } jQuery.getJSON( sSource, aoData, function (json) {fnCallback(json)} ); }',
             {% endif %}
             {% if params['aaData'] is not null %}
                 "aaData": {{ params['aaData']|raw }},
