@@ -29,6 +29,31 @@ public function registerBundles()
 }
 ```
 
+### Assetic
+
+As part of the composer requirements, both jQuery and DataTables are added to the vendor directory.  You are welcome
+to use those files, or install your own.  But both jQuery and DataTables are required to be added to your templates
+to use this bundle.
+
+``` yml
+# config.yml
+
+assetic:
+    assets:
+        data_tables:
+            inputs:
+                - %kernel.root_dir%/../vendor/jquery/jquery/jquery-1.9.1.js
+                - %kernel.root_dir%/../vendor/datatables/datatables/media/js/jquery.dataTables.js
+```
+
+```jinja
+  {# Resources\viees\base.html.twig #}
+
+  {% javascripts '@dataa_tables' %}
+      <script type="text/javascript" src="{{ asset_url }}"></script>
+  {% endjavascripts %}
+```
+
 ## Usage examples:
 
 Currently dataTables can paginate :
