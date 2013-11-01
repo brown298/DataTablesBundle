@@ -14,6 +14,9 @@
             {% if params['path']|length > 0 %}
                 "sAjaxSource":     "{{ params['path']|raw }}",
             {% endif %}
+            {% if params['aaSorting']|length > 0 %}
+                "aaSorting": {{ params['aaSorting']|json_encode()|raw }},
+            {% endif %}
             {% if params['bServerSide'] %}
                 "bServerSide":     {{ params['bServerSide']|raw }},
             {% endif %}
