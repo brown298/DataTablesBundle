@@ -223,7 +223,7 @@ class DefaultController extends Controller
         );
     }
 }
-```php
+```
 
 #### View
 ```jinja
