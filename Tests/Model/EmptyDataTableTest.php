@@ -225,7 +225,7 @@ class EmptyDataTableTest extends AbstractBaseTest
     {
         Phake::when($this->request)->isXmlHttpRequest()->thenReturn(true);
         $this->setProtectedValue($this->dataTable,'dataFormatter',function ($data){});
-        
+
         $result = $this->dataTable->processRequest($this->request);
 
         $this->assertInstanceOf('Symfony\Component\HttpFoundation\JsonResponse', $result);
