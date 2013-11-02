@@ -329,24 +329,6 @@ class RequestParameterBagTest extends AbstractBaseTest
     }
 
     /**
-     * testGetSearchColumnsGeneric
-     */
-    public function testGetSearchColumnsGeneric()
-    {
-        $expectedResult = array('a.id' => 'test');
-        $columns = array(
-            'a.id' => 'ID',
-        );
-        $this->model->setColumns($columns);
-        $this->callProtected($this->model, 'setVarByNameId', array('searchable', 0, 'true'));
-        $this->callProtected($this->model,'setVarByName', array('search', 'test'));
-
-        $results = $this->model->getSearchColumns();
-
-        $this->assertEquals($expectedResult, $results);
-    }
-
-    /**
      * testGetSearchColumnsSpecificColumn
      */
     public function testGetSearchColumnsSpecificColumn()

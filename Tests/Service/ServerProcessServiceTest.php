@@ -223,7 +223,7 @@ class ServerProcessServiceTest extends AbstractBaseTest
      *
      * ensures when multiple columns are being searched, they are or joined
      */
-    public function testAddSearchWithMultipleParametersUsesOr()
+    public function testAddSearchWithMultipleParametersUsesAnd()
     {
         $columns = array(
             'a.id'   => 'test',
@@ -235,7 +235,7 @@ class ServerProcessServiceTest extends AbstractBaseTest
         $results = $this->service->addSearch($this->queryBuilder);
 
         $this->assertEquals($this->queryBuilder, $results);
-        Phake::verify($this->queryBuilder)->andWhere('a.id LIKE :a_id or b.name LIKE :b_name');
+        Phake::verify($this->queryBuilder)->andWhere('a.id LIKE :a_id and b.name LIKE :b_name');
         Phake::verify($this->queryBuilder)->setParameter('a_id', '%test%');
         Phake::verify($this->queryBuilder)->setParameter('b_name', '%123%');
     }
@@ -325,7 +325,9 @@ class ServerProcessServiceTest extends AbstractBaseTest
     public function testBuildQuery()
     {
         Phake::when($this->requestParameters)->getSortingColumns()->thenReturn(array());
+        Phake::when($this->requestParameters)->getColumns()->thenReturn(array());
         Phake::when($this->requestParameters)->getSearchColumns()->thenReturn(array());
+        Phake::when($this->queryBuilder)->getQuery()->thenReturn($this->query);
         $this->setProtectedValue($this->service, 'requestParameters', $this->requestParameters);
         $this->setProtectedValue($this->service, 'queryBuilder', $this->queryBuilder);
         $result = $this->service->buildQuery();

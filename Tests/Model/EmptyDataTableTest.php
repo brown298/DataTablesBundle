@@ -44,6 +44,11 @@ class EmptyDataTableTest extends AbstractBaseTest
     protected $dataTable;
 
     /**
+     * @var \Psr\Log\LoggerInterface
+     */
+    protected $logger;
+
+    /**
      * setUp
      */
     public function setUp()
@@ -54,6 +59,9 @@ class EmptyDataTableTest extends AbstractBaseTest
         $this->container         = Phake::mock('Symfony\Component\DependencyInjection\ContainerInterface');
         $this->request           = Phake::mock('Symfony\Component\HttpFoundation\Request');
         $this->dataTablesService = Phake::mock('Brown298\DataTablesBundle\Service\ServerProcessService');
+        $this->logger            = Phake::mock('\Psr\Log\LoggerInterface');
+
+        Phake::when($this->container)->get('logger')->thenReturn($this->logger);
 
         $this->dataTable = new EmptyDataTable($this->em);
     }
@@ -153,12 +161,12 @@ class EmptyDataTableTest extends AbstractBaseTest
      */
     public function testGetDatByQueryBuilderEmptyColumns()
     {
-        Phake::when($this->container)->get(Phake::anyParameters())->thenReturn($this->dataTablesService);
+        Phake::when($this->container)->get('data_tables.service')->thenReturn($this->dataTablesService);
         $this->dataTable->setContainer($this->container);
 
         $this->callProtected($this->dataTable, 'getDataByQueryBuilder', array($this->request, $this->queryBuilder, null));
 
-        Phake::verify($this->dataTablesService)->process(null);
+        Phake::verify($this->dataTablesService)->process(null, false);
         Phake::verify($this->dataTablesService)->setRequest($this->request);
         Phake::verify($this->dataTablesService)->setColumns(array());
     }
@@ -180,7 +188,7 @@ class EmptyDataTableTest extends AbstractBaseTest
     {
         $this->dataTable->setQueryBuilder($this->queryBuilder);
         $this->dataTable->setContainer($this->container);
-        Phake::when($this->container)->get(Phake::anyParameters())->thenReturn($this->dataTablesService);
+        Phake::when($this->container)->get('data_tables.service')->thenReturn($this->dataTablesService);
 
         $result = $this->dataTable->getJsonResponse($this->request);
 
