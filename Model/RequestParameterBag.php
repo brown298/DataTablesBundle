@@ -162,8 +162,6 @@ class RequestParameterBag extends AbstractParamterBag
             if ($this->isSearchable($i)) {
                 if ($this->hasColumnSearch($i)) {
                     $results[$name] = $this->getColumnSearch($i);
-                } else {
-                    $results[$name] = $this->getSearchString();
                 }
             }
 

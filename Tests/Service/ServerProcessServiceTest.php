@@ -35,6 +35,11 @@ class ServerProcessServiceTest extends AbstractBaseTest
     protected $requestParameters;
 
     /**
+     * @var Psr\Log\LoggerInterface
+     */
+    protected $logger;
+
+    /**
      * @var \Brown298\DataTablesBundle\Service\ServerProcessService
      */
     protected $service;
@@ -51,6 +56,7 @@ class ServerProcessServiceTest extends AbstractBaseTest
         $this->queryBuilder      = Phake::mock('Doctrine\ORM\QueryBuilder');
         $this->query             = Phake::mock('Doctrine\ORM\AbstractQuery');
         $this->requestParameters = Phake::mock('Brown298\DataTablesBundle\Model\RequestParameterBag');
+        $this->logger            = Phake::mock('Psr\Log\LoggerInterface');
 
         $this->service->setRequest($this->request);
     }
@@ -223,7 +229,7 @@ class ServerProcessServiceTest extends AbstractBaseTest
      *
      * ensures when multiple columns are being searched, they are or joined
      */
-    public function testAddSearchWithMultipleParametersUsesOr()
+    public function testAddSearchWithMultipleParametersUsesAnd()
     {
         $columns = array(
             'a.id'   => 'test',
@@ -235,7 +241,7 @@ class ServerProcessServiceTest extends AbstractBaseTest
         $results = $this->service->addSearch($this->queryBuilder);
 
         $this->assertEquals($this->queryBuilder, $results);
-        Phake::verify($this->queryBuilder)->andWhere('a.id LIKE :a_id or b.name LIKE :b_name');
+        Phake::verify($this->queryBuilder)->andWhere('a.id LIKE :a_id and b.name LIKE :b_name');
         Phake::verify($this->queryBuilder)->setParameter('a_id', '%test%');
         Phake::verify($this->queryBuilder)->setParameter('b_name', '%123%');
     }
@@ -325,7 +331,9 @@ class ServerProcessServiceTest extends AbstractBaseTest
     public function testBuildQuery()
     {
         Phake::when($this->requestParameters)->getSortingColumns()->thenReturn(array());
+        Phake::when($this->requestParameters)->getColumns()->thenReturn(array());
         Phake::when($this->requestParameters)->getSearchColumns()->thenReturn(array());
+        Phake::when($this->queryBuilder)->getQuery()->thenReturn($this->query);
         $this->setProtectedValue($this->service, 'requestParameters', $this->requestParameters);
         $this->setProtectedValue($this->service, 'queryBuilder', $this->queryBuilder);
         $result = $this->service->buildQuery();
@@ -366,6 +374,32 @@ class ServerProcessServiceTest extends AbstractBaseTest
             'iTotalDisplayRecords' => null,
             'aaData'               => array(),
         ), $result);
+    }
+
+    /**
+     * testProcessQueryBuilderEntity
+     *
+     * test that the process works with a query builder requesting an entity
+     */
+    public function testProcessQueryBuilderEntity()
+    {
+        $dataFormatter = null;
+        $this->setProtectedValue($this->service, 'queryBuilder', $this->queryBuilder);
+        Phake::when($this->queryBuilder)->select(Phake::anyParameters())->thenReturn($this->queryBuilder);
+        Phake::when($this->queryBuilder)->getQuery()->thenReturn($this->query);
+        Phake::when($this->query)->getArrayResult()->thenReturn(array(array()));
+        Phake::when($this->query)->getResult()->thenReturn(array());
+
+        $result = $this->service->process($dataFormatter, true);
+
+        $this->assertEquals(array(
+            'sEcho'                => null,
+            'iTotalRecords'        => null,
+            'iTotalDisplayRecords' => null,
+            'aaData'               => array(),
+        ), $result);
+
+        Phake::verify($this->query)->getResult();
     }
 
     /**
@@ -433,4 +467,77 @@ class ServerProcessServiceTest extends AbstractBaseTest
         ), $result);
     }
 
+    /**
+     * testDebug
+     */
+    public function testDebug()
+    {
+        $this->service->setLogger($this->logger);
+
+        $this->service->debug('test');
+
+        Phake::verify($this->logger)->debug('test');
+    }
+
+    /**
+     * testGenericSearchNoColumns
+     */
+    public function testGenericSearchNoColumns()
+    {
+        Phake::when($this->requestParameters)->getSearchString()->thenReturn('test');
+        Phake::when($this->requestParameters)->getColumns()->thenReturn(array());
+        $this->setProtectedValue($this->service, 'requestParameters', $this->requestParameters);
+        $this->service->setLogger($this->logger);
+
+        $result = $this->service->addGenericSearch($this->queryBuilder);
+
+        $this->assertEquals($this->queryBuilder, $result);
+        Phake::verify($this->logger)->debug('sSearch: test');
+    }
+
+    /**
+     * testGenericSearchColumn
+     *
+     * tests a single search colmn
+     */
+    public function testGenericSearchColumn()
+    {
+        $columns = array(
+            'a.id' => 'ID',
+        );
+        Phake::when($this->requestParameters)->getSearchString()->thenReturn('test');
+        Phake::when($this->requestParameters)->getColumns()->thenReturn($columns);
+        $this->setProtectedValue($this->service, 'requestParameters', $this->requestParameters);
+        $this->service->setLogger($this->logger);
+
+        $result = $this->service->addGenericSearch($this->queryBuilder);
+
+        $this->assertEquals($this->queryBuilder, $result);
+        Phake::verify($this->logger)->debug('sSearch: test');
+        Phake::verify($this->queryBuilder)->setParameter('a_id_search', '%test%');
+        Phake::verify($this->queryBuilder)->andWhere('a.id LIKE :a_id_search');
+    }
+
+    /**
+     * testGenericSearchColumns
+     */
+    public function testGenericSearchColumns()
+    {
+        $columns = array(
+            'a.id'   => 'ID',
+            'a.name' => 'Name',
+        );
+        Phake::when($this->requestParameters)->getSearchString()->thenReturn('test');
+        Phake::when($this->requestParameters)->getColumns()->thenReturn($columns);
+        $this->setProtectedValue($this->service, 'requestParameters', $this->requestParameters);
+        $this->service->setLogger($this->logger);
+
+        $result = $this->service->addGenericSearch($this->queryBuilder);
+
+        $this->assertEquals($this->queryBuilder, $result);
+        Phake::verify($this->logger)->debug('sSearch: test');
+        Phake::verify($this->queryBuilder)->setParameter('a_id_search', '%test%');
+        Phake::verify($this->queryBuilder)->setParameter('a_name_search', '%test%');
+        Phake::verify($this->queryBuilder)->andWhere('a.id LIKE :a_id_search or a.name LIKE :a_name_search');
+    }
 }

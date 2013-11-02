@@ -3,6 +3,7 @@ namespace Brown298\DataTablesBundle\Service;
 
 use Brown298\DataTablesBundle\Model\RequestParameterBag;
 use Brown298\DataTablesBundle\Model\ResponseParameterBag;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\QueryBuilder;
 
@@ -40,6 +41,11 @@ class ServerProcessService
      * @var array
      */
     protected $data = null;
+
+    /**
+     * @var null|PSR\Log|Logger
+     */
+    protected $logger = null;
 
     /**
      * @param Request $request
@@ -135,7 +141,7 @@ class ServerProcessService
      *
      * @return array
      */
-    public function process($dataFormatter = null)
+    public function process($dataFormatter = null, $getEntity = false)
     {
         $this->responseParameters = new ResponseParameterBag();
         $this->responseParameters->setRequest($this->requestParameters);
@@ -146,7 +152,11 @@ class ServerProcessService
             $aliases = $qb->getRootAliases();
             $alias   = $aliases[0];
 
-            $this->responseParameters->setData($qb->getQuery()->getArrayResult());
+            if ($getEntity) {
+                $this->responseParameters->setData($qb->getQuery()->getResult());
+            } else {
+                $this->responseParameters->setData($qb->getQuery()->getArrayResult());
+            }
             $total        = $this->getTotalRecords(clone($this->queryBuilder), $alias);
             $displayTotal = $this->getTotalRecords(clone($this->queryBuilder), $alias);
             
@@ -182,9 +192,49 @@ class ServerProcessService
         $qb = clone($this->queryBuilder);
 
         $qb = $this->addSearch($qb);
+        $qb = $this->addGenericSearch($qb);
         $qb = $this->addOrder($qb);
         $qb = $this->addOffset($qb);
         $qb = $this->addLimits($qb);
+
+        $this->debug('DataTables Query:' . $qb->getQuery()->getSQL() . ' ' . json_encode($qb->getParameters()));
+        return $qb;
+    }
+
+    /**
+     * addGenericSearch
+     *
+     * @param QueryBuilder $qb
+     *
+     * @return QueryBuilder
+     */
+    public function addGenericSearch(QueryBuilder $qb)
+    {
+        $search      = $this->requestParameters->getSearchString();
+        $joinType    = 'or';
+        $query       = '';
+        $queryParams = array();
+
+        // add search
+        $this->debug("sSearch: {$search}");
+        foreach ($this->getColumns() as $name => $title) {
+            if (strlen($search) > 0) {
+                $paramName = str_replace('.','_',$name) . '_search';
+                if (strlen($query) > 0) {
+                    $query .= " {$joinType} ";
+                }
+                $query .= "{$name} LIKE :{$paramName}";
+                $queryParams[$paramName] = '%' . $search . '%';
+            }
+        }
+
+        // add the parameters
+        if (strlen($query) > 0) {
+            $qb->andWhere($query);
+            foreach ($queryParams as $name => $value) {
+                $qb->setParameter($name, $value);
+            }
+        }
 
         return $qb;
     }
@@ -198,16 +248,17 @@ class ServerProcessService
      */
     public function addSearch(QueryBuilder $qb)
     {
-        $search      = $this->requestParameters->getSearchColumns();
+        $searchCols  = $this->requestParameters->getSearchColumns();
         $query       = '';
+        $joinType    = 'and';
         $queryParams = array();
 
         // build what the parameters are
-        foreach ($search as $name => $value) {
+        foreach ($searchCols as $name => $value) {
             if (strlen($value) > 0) {
                 $paramName = str_replace('.','_',$name);
                 if (strlen($query) > 0) {
-                    $query .= ' or ';
+                    $query .= " {$joinType} ";
                 }
                 $query .= "{$name} LIKE :{$paramName}";
                 $queryParams[$paramName] = '%' . $value . '%';
@@ -224,7 +275,6 @@ class ServerProcessService
 
         return $qb;
     }
-
 
     /**
      * addOrder
@@ -332,4 +382,27 @@ class ServerProcessService
     {
         return $this->responseParameters;
     }
+
+    /**
+     * setLogger
+     *
+     * @param $logger
+     */
+    public function setLogger(LoggerInterface $logger = null)
+    {
+        $this->logger = $logger;
+    }
+
+    /**
+     * debug
+     *
+     * @param $message
+     */
+    public function debug($message)
+    {
+        if ($this->logger instanceof LoggerInterface) {
+            $this->logger->debug($message);
+        }
+    }
+
 }
