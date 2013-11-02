@@ -161,11 +161,13 @@ class EmptyDataTableTest extends AbstractBaseTest
      */
     public function testGetDatByQueryBuilderEmptyColumns()
     {
+        Phake::when($this->container)->has('logger')->thenReturn(true);
         Phake::when($this->container)->get('data_tables.service')->thenReturn($this->dataTablesService);
         $this->dataTable->setContainer($this->container);
 
         $this->callProtected($this->dataTable, 'getDataByQueryBuilder', array($this->request, $this->queryBuilder, null));
 
+        Phake::verify($this->container)->get('logger');
         Phake::verify($this->dataTablesService)->process(null, false);
         Phake::verify($this->dataTablesService)->setRequest($this->request);
         Phake::verify($this->dataTablesService)->setColumns(array());

@@ -91,8 +91,12 @@ abstract class AbstractDataTable implements DataTableInterface, ContainerAwareIn
     protected function getDataByQueryBuilder(Request $request, QueryBuilder $qb, $dataFormatter = null)
     {
         $service = $this->container->get('data_tables.service');
-        $logger  = $this->container->get('logger');
-        $service->setLogger($logger);
+
+        // logger is optional
+        if ($this->container->has('logger')) {
+            $logger  = $this->container->get('logger');
+            $service->setLogger($logger);
+        }
 
         if ($service->getRequest() == null) {
             $service->setRequest($request);
