@@ -47,9 +47,9 @@ assetic:
 ```
 
 ```jinja
-  {# Resources\viees\base.html.twig #}
+  {# Resources\views\base.html.twig #}
 
-  {% javascripts '@dataa_tables' %}
+  {% javascripts '@data_tables' %}
       <script type="text/javascript" src="{{ asset_url }}"></script>
   {% endjavascripts %}
 ```
