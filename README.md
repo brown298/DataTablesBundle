@@ -42,7 +42,7 @@ assetic:
     assets:
         data_tables:
             inputs:
-                - %kernel.root_dir%/../vendor/jquery/jquery/jquery-1.9.1.js
+                - %kernel.root_dir%/../vendor/datatables/datatables/media/js/jquery.js
                 - %kernel.root_dir%/../vendor/datatables/datatables/media/js/jquery.dataTables.js
 ```
 

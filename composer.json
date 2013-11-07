@@ -6,17 +6,6 @@
     "license": "LGPL-3.0+",
     "repositories": [
         {
-            "type": "package",
-            "package": {
-                "name": "jquery/jquery",
-                "version": "1.9.1",
-                "dist": {
-                    "url": "http://code.jquery.com/jquery-1.9.1.js",
-                    "type": "file"
-                }
-            }
-        },
-        {
             "type": "vcs",
             "url":  "https://github.com/DataTables/DataTables.git"
         }
@@ -28,7 +17,6 @@
     },
     "target-dir": "Brown298/DataTablesBundle",
     "require": {
-        "jquery/jquery":                "1.9.*",
         "php":                          ">=5.3.3",
         "doctrine/orm":                 "~2.2,>=2.2.3",
         "datatables/datatables":        "dev-master",
