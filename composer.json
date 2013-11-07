@@ -17,7 +17,6 @@
     },
     "target-dir": "Brown298/DataTablesBundle",
     "require": {
-        "components/jquery":            "1.9.*@dev",
         "php":                          ">=5.3.3",
         "doctrine/orm":                 "~2.2,>=2.2.3",
         "datatables/datatables":        "dev-master",
