@@ -20,6 +20,12 @@
             {% if params['bServerSide'] %}
                 "bServerSide":     {{ params['bServerSide']|raw }},
             {% endif %}
+            {% if params['fnDrawCallback'] %}
+                "fnDrawCallback":     {{ params['fnDrawCallback']|raw }},
+            {% endif %}
+            {% if params['aaSortingFixed'] %}
+                "aaSortingFixed":     {{ params['aaSortingFixed']|raw }},
+            {% endif %}
             {% if params['fnServerData'] is defined %}
                 "fnServerData": {{ params['fnServerData']|raw }},
             {% elseif params['customSearchForm'] is defined %}
