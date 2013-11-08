@@ -20,10 +20,10 @@
             {% if params['bServerSide'] %}
                 "bServerSide":     {{ params['bServerSide']|raw }},
             {% endif %}
-            {% if params['fnDrawCallback'] %}
+            {% if params['fnDrawCallback'] is defined %}
                 "fnDrawCallback":     {{ params['fnDrawCallback']|raw }},
             {% endif %}
-            {% if params['aaSortingFixed'] %}
+            {% if params['aaSortingFixed'] is defined %}
                 "aaSortingFixed":     {{ params['aaSortingFixed']|raw }},
             {% endif %}
             {% if params['fnServerData'] is defined %}
