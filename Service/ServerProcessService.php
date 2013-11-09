@@ -3,6 +3,8 @@ namespace Brown298\DataTablesBundle\Service;
 
 use Brown298\DataTablesBundle\Model\RequestParameterBag;
 use Brown298\DataTablesBundle\Model\ResponseParameterBag;
+use Brown298\DataTablesBundle\Service\AbstractServerProcessor;
+use Brown298\DataTablesBundle\Service\Processor\ArrayProcessor;
 use Brown298\DataTablesBundle\Service\Processor\QueryBuilderProcessor;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,100 +18,8 @@ use Doctrine\ORM\QueryBuilder;
  * @package Brown298\DataTablesBundle\Service
  * @author  John Brown <brown.john@gmail.com>
  */
-class ServerProcessService
+class ServerProcessService extends AbstractServerProcessor
 {
-    /**
-     * @var \Brown298\DataTablesBundle\Service\Processor\QueryBuilderPorcessor
-     */
-    protected $queryBuilderProcessor;
-
-    /**
-     * @var \Symfony\Component\HttpFoundation\Request
-     */
-    protected $request;
-
-    /**
-     * @var \Brown298\DataTablesBundle\Model\RequestParameterBag
-     */
-    protected $requestParameters;
-
-    /**
-     * @var \Brown298\DataTablesBundle\Model\ResponseParameterBag
-     */
-    protected $responseParameters;
-
-    /**
-     * @var array
-     */
-    protected $data = null;
-
-    /**
-     * @var null|PSR\Log|Logger
-     */
-    protected $logger = null;
-
-    /**
-     * @param Request $request
-     */
-    public function setRequest(Request $request)
-    {
-        $this->request = $request;
-        $this->requestParameters = new RequestParameterBag();
-        $this->requestParameters->fromRequest($request);
-    }
-
-    /**
-     * getRequest
-     *
-     * @return Request
-     */
-    public function getRequest()
-    {
-        return $this->request;
-    }
-
-    /**
-     * setQueryBuilder
-     *
-     * @param QueryBuilder $queryBuilder]
-     */
-    public function setQueryBuilder(QueryBuilder $queryBuilder)
-    {
-        $this->queryBuilderProcessor = new QueryBuilderProcessor($queryBuilder, $this->requestParameters, $this->logger);
-    }
-
-
-
-    /**
-     * addColumn
-     *
-     * @param $name
-     * @param $title
-     */
-    public function addColumn($name, $title)
-    {
-        $this->requestParameters->addColumn($name, $title);
-    }
-
-    /**
-     * setColumns
-     *
-     * @param array $columns
-     */
-    public function setColumns(array $columns)
-    {
-        $this->requestParameters->setColumns($columns);
-    }
-
-    /**
-     * getColumns
-     *
-     * @return array
-     */
-    public function getColumns()
-    {
-        return $this->requestParameters->getColumns();
-    }
 
     /**
      * process
@@ -127,33 +37,49 @@ class ServerProcessService
         $this->responseParameters->setRequest($this->requestParameters);
 
         // check if we are using a query builder or an array of data
-        if (!is_array($this->data)) {
-            $this->responseParameters = $this->queryBuilderProcessor->process($this->responseParameters, $dataFormatter, $getEntity);
-        } else {
-            $offset = $this->requestParameters->getOffset();
-            $length = $this->requestParameters->getDisplayLength();
-
-            if ($length > 0) {
-                $data = array_slice($this->data, $offset, $length);
-            } else {
-                $data = array_slice($this->data, $offset);
-            }
-
-            $this->responseParameters->setData($data);
-            $this->responseParameters->setTotal(count($this->data));
-            $this->responseParameters->setDisplayTotal(count($data));
+        switch(get_class($this->processor)) {
+            case "Brown298\\DataTablesBundle\\Service\\Processor\\QueryBuilderProcessor":
+                $this->responseParameters = $this->processor->process($this->responseParameters, $dataFormatter, $getEntity);
+                break;
+            case "Brown298\\DataTablesBundle\\Service\\Processor\\ArrayProcessor":
+                $this->responseParameters = $this->processor->process($this->responseParameters, $dataFormatter);
+                break;
         }
-
+        
         return $this->responseParameters->all($dataFormatter);
     }
 
+    /**
+     * setQueryBuilder
+     *
+     * @param QueryBuilder $queryBuilder]
+     */
+    public function setQueryBuilder(QueryBuilder $queryBuilder)
+    {
+        $this->processor = new QueryBuilderProcessor($queryBuilder, $this->requestParameters, $this->logger);
+    }
+
+    /**
+     * getQueryBuilder
+     *
+     * @return null
+     */
+    public function getQueryBuilder()
+    {
+        if ($this->processor == null || !($this->processor instanceof ArrayProcessor)) {
+            return null;
+        }
+
+        return $this->processor->getQueryBuilder();
+    }
 
     /**
      * @param array $data
      */
     public function setData(array $data)
     {
-        $this->data = $data;
+        $this->processor = new ArrayProcessor($this->requestParameters, $this->logger);
+        $this->processor->setData($data);
     }
 
     /**
@@ -161,45 +87,11 @@ class ServerProcessService
      */
     public function getData()
     {
-        return $this->data;
-    }
-
-    /**
-     * @return \Brown298\DataTablesBundle\Model\RequestParameterBag
-     */
-    public function getRequestParameters()
-    {
-        return $this->requestParameters;
-    }
-
-    /**
-     * @return \Brown298\DataTablesBundle\Model\ResponseParameterBag
-     */
-    public function getResponseParameters()
-    {
-        return $this->responseParameters;
-    }
-
-    /**
-     * setLogger
-     *
-     * @param $logger
-     */
-    public function setLogger(LoggerInterface $logger = null)
-    {
-        $this->logger = $logger;
-    }
-
-    /**
-     * debug
-     *
-     * @param $message
-     */
-    public function debug($message)
-    {
-        if ($this->logger instanceof LoggerInterface) {
-            $this->logger->debug($message);
+        if ($this->processor == null || !($this->processor instanceof ArrayProcessor)) {
+            return null;
         }
+
+        return $this->processor->getData();
     }
 
 }

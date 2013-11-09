@@ -44,6 +44,41 @@ class QueryBuilderProcessor
         $this->setQueryBuilder($queryBuilder);
         $this->requestParameters = $requestParameters;
     }
+
+    /**
+     * process
+     *
+     * @param ResponseParameterBag $responseParameters
+     * @param null                 $dataFormatter
+     * @param bool                 $getEntity
+     *
+     * @return ResponseParameterBag
+     */
+    public function process(ResponseParameterBag $responseParameters = null, $dataFormatter = null, $getEntity = false)
+    {
+        if ($responseParameters === null) {
+            $responseParameters = new ResponseParameterBag();
+            $responseParameters->setRequest($this->requestParameters);
+        }
+
+        $qb      = $this->buildQuery();
+        $aliases = $qb->getRootAliases();
+        $alias   = $aliases[0];
+
+        if ($getEntity) {
+            $responseParameters->setData($qb->getQuery()->getResult());
+        } else {
+            $responseParameters->setData($qb->getQuery()->getArrayResult());
+        }
+        $total        = $this->getTotalRecords(clone($this->queryBuilder), $alias);
+        $displayTotal = $this->getTotalRecords(clone($this->queryBuilder), $alias);
+
+        $responseParameters->setTotal($total);
+        $responseParameters->setDisplayTotal($displayTotal);
+
+        return $responseParameters;
+    }
+
     /**
      * setQueryBuilder
      *
@@ -53,6 +88,16 @@ class QueryBuilderProcessor
     {
         $this->queryBuilder = $queryBuilder;
         $this->parseColumns($queryBuilder);
+    }
+
+    /**
+     * getQueryBuilder
+     *
+     * @return QueryBuilder
+     */
+    public function getQueryBuilder()
+    {
+        return $this->queryBuilder;
     }
 
     /**
@@ -253,40 +298,6 @@ class QueryBuilderProcessor
         $rawResult = $qb->getQuery()->getArrayResult();
 
         return array_pop($rawResult[0]);
-    }
-
-    /**
-     * process
-     *
-     * @param ResponseParameterBag $responseParameters
-     * @param null                 $dataFormatter
-     * @param bool                 $getEntity
-     *
-     * @return ResponseParameterBag
-     */
-    public function process(ResponseParameterBag $responseParameters = null, $dataFormatter = null, $getEntity = false)
-    {
-        if ($responseParameters === null) {
-            $responseParameters = new ResponseParameterBag();
-            $responseParameters->setRequest($this->requestParameters);
-        }
-
-        $qb      = $this->buildQuery();
-        $aliases = $qb->getRootAliases();
-        $alias   = $aliases[0];
-
-        if ($getEntity) {
-            $responseParameters->setData($qb->getQuery()->getResult());
-        } else {
-            $responseParameters->setData($qb->getQuery()->getArrayResult());
-        }
-        $total        = $this->getTotalRecords(clone($this->queryBuilder), $alias);
-        $displayTotal = $this->getTotalRecords(clone($this->queryBuilder), $alias);
-
-        $responseParameters->setTotal($total);
-        $responseParameters->setDisplayTotal($displayTotal);
-
-        return $responseParameters;
     }
 
     /**

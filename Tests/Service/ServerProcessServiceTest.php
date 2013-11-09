@@ -264,7 +264,7 @@ class ServerProcessServiceTest extends AbstractBaseTest
         Phake::when($this->queryBuilder)->getDQLPart('select')->thenReturn(array());
         $this->service->setQueryBuilder($this->queryBuilder);
 
-        $processor = $this->getProtectedValue($this->service, 'queryBuilderProcessor');
+        $processor = $this->getProtectedValue($this->service, 'processor');
         $this->assertEquals($this->queryBuilder, $this->getProtectedValue($processor, 'queryBuilder'));
 
         // ensure we parse the columsn
