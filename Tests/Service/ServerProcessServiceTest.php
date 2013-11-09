@@ -80,6 +80,14 @@ class ServerProcessServiceTest extends AbstractBaseTest
     }
 
     /**
+     * testGetDataNoProcessorReturnsNull
+     */
+    public function testGetDataNoProcessorReturnsNull()
+    {
+        $this->assertNull($this->service->getData());
+    }
+
+    /**
      * testGetSetRequest
      */
     public function testGetSetRequest()
@@ -228,6 +236,23 @@ class ServerProcessServiceTest extends AbstractBaseTest
             'iTotalDisplayRecords' => null,
             'aaData'               => array(),
         ), $result);
+    }
+
+    /**
+     * testGetQueryBuilderNoProcessorReturnsNull
+     */
+    public function testGetQueryBuilderNoProcessorReturnsNull()
+    {
+        $this->assertNull($this->service->getQueryBuilder());
+    }
+
+    /**
+     * testGetQueryBuilderReturnsQueryBuilder
+     */
+    public function testGetQueryBuilderReturnsQueryBuilder()
+    {
+        $this->service->setQueryBuilder($this->queryBuilder);
+        $this->assertEquals($this->queryBuilder, $this->service->getQueryBuilder());
     }
 
     /**

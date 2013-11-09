@@ -65,7 +65,7 @@ class ServerProcessService extends AbstractServerProcessor
      */
     public function getQueryBuilder()
     {
-        if ($this->processor == null || !($this->processor instanceof ArrayProcessor)) {
+        if ($this->processor == null || !($this->processor instanceof QueryBuilderProcessor)) {
             return null;
         }
 
