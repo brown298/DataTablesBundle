@@ -256,6 +256,16 @@ class ServerProcessServiceTest extends AbstractBaseTest
     }
 
     /**
+     * testProcessThrowsErrorWithoutProcessorDefined
+     *
+     * @expectedException Brown298\DataTablesBundle\Exceptions\ProcessorException
+     */
+    public function testProcessThrowsErrorWithoutProcessorDefined()
+    {
+        $this->service->process();
+    }
+
+    /**
      * testProcessQueryBuilderEntity
      *
      * test that the process works with a query builder requesting an entity

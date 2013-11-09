@@ -99,15 +99,16 @@ class QueryBuilderProcessor extends AbstractProcessor implements ProcessorInterf
     public function parseColumns(QueryBuilder $qb)
     {
         $selects = $qb->getDQLPart('select');
+        $this->setColumns(array());
 
         if (!empty($selects)) {
             foreach ($selects as $queryPart) {
                 foreach ($queryPart as $part) {
                     if (preg_match('/.+ as .+/', $part)) {
                         $parts = explode(' as ', $part);
-                        $this->requestParameters->addColumn($parts[0], $parts[1]);
+                        $this->addColumn($parts[0], $parts[1]);
                     } else {
-                        $this->requestParameters->addColumn($part, $part);
+                        $this->addColumn($part, $part);
                     }
                 }
             }
@@ -151,22 +152,26 @@ class QueryBuilderProcessor extends AbstractProcessor implements ProcessorInterf
 
         // add search
         $this->debug("sSearch: {$search}");
-        foreach ($this->getColumns() as $name => $title) {
-            if (strlen($search) > 0) {
-                $paramName = str_replace('.','_',$name) . '_search';
-                if (strlen($query) > 0) {
-                    $query .= " {$joinType} ";
-                }
-                $query .= "{$name} LIKE :{$paramName}";
-                $queryParams[$paramName] = '%' . $search . '%';
-            }
-        }
+        $searchColumns = $this->getColumns();
 
-        // add the parameters
-        if (strlen($query) > 0) {
-            $qb->andWhere($query);
-            foreach ($queryParams as $name => $value) {
-                $qb->setParameter($name, $value);
+        if (!empty($searchColumns)) {
+            foreach ($searchColumns as $name => $title) {
+                if (strlen($search) > 0) {
+                    $paramName = str_replace('.','_',$name) . '_search';
+                    if (strlen($query) > 0) {
+                        $query .= " {$joinType} ";
+                    }
+                    $query .= "{$name} LIKE :{$paramName}";
+                    $queryParams[$paramName] = '%' . $search . '%';
+                }
+            }
+
+            // add the parameters
+            if (strlen($query) > 0) {
+                $qb->andWhere($query);
+                foreach ($queryParams as $name => $value) {
+                    $qb->setParameter($name, $value);
+                }
             }
         }
 

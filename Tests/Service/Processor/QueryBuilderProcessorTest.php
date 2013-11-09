@@ -61,8 +61,6 @@ class QueryBuilderProcessorTest extends AbstractBaseTest
         $this->assertInstanceOf('\Brown298\DataTablesBundle\Service\Processor\QueryBuilderProcessor', $this->service);
     }
 
-
-
     /**
      * testAddOrderNoSortingDoesNothing
      */
@@ -275,8 +273,6 @@ class QueryBuilderProcessorTest extends AbstractBaseTest
         Phake::verify($this->requestParameters)->getDisplayLength();
     }
 
-
-
     /**
      * testGenericSearchNoColumns
      */
@@ -339,4 +335,16 @@ class QueryBuilderProcessorTest extends AbstractBaseTest
         Phake::verify($this->queryBuilder)->andWhere('a.id LIKE :a_id_search or a.name LIKE :a_name_search');
     }
 
+    /**
+     * testProcessCreatesResponseParameterBag
+     */
+    public function testProcessCreatesResponseParameterBag()
+    {
+        Phake::when($this->queryBuilder)->getQuery()->thenReturn($this->query);
+        Phake::when($this->query)->getResult()->thenReturn(array());
+        Phake::when($this->queryBuilder)->select(Phake::anyParameters())->thenReturn($this->queryBuilder);
+        Phake::when($this->query)->getArrayResult()->thenReturn(array(array()));
+        $result = $this->service->process();
+        $this->assertInstanceOf('Brown298\DataTablesBundle\Model\ResponseParameterBag', $result);
+    }
 }
