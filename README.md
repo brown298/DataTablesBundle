@@ -75,7 +75,7 @@ class DefaultController extends AbstractController
      */
     protected $columns = array(
         'user.id'   => 'Id',
-        'user.name' => 'Name,
+        'user.name' => 'Name',
     );
 
     /**
@@ -87,7 +87,7 @@ class DefaultController extends AbstractController
      */
     public function getQueryBuilder(Request $request)
     {
-        $em             = $this->get('doctrine.orm.entity_manager')
+        $em             = $this->get('doctrine.orm.entity_manager');
         $userRepository = $em->getRepository('ExampleBundle\Entity\User');
         $qb = $userRepository->createQueryBuilder('user')
                 ->andWhere('user.deleted = false');
