@@ -11,7 +11,7 @@ use Psr\Log\LoggerInterface;
  * @package Brown298\DataTablesBundle\Service\Processor
  * @author  John Brown <brown.john@gmail.com>
  */
-class ArrayProcessor
+class ArrayProcessor extends AbstractProcessor implements ProcessorInterface
 {
     /**
      * @var array
@@ -19,23 +19,14 @@ class ArrayProcessor
     protected $data = array();
 
     /**
-     * @var null|PSR\Log|Logger
-     */
-    protected $logger = null;
-
-    /**
-     * __construct
+     * process
      *
-     * @param RequestParameterBag $requestParameters
-     * @param \Psr\Log\LoggerInterface $logger
+     * @param ResponseParameterBag $responseParameters
+     * @param bool $getEntity
+     *
+     * @return ResponseParameterBag
      */
-    public function __construct(RequestParameterBag $requestParameters, LoggerInterface $logger = null)
-    {
-        $this->logger = $logger;
-        $this->requestParameters = $requestParameters;
-    }
-
-    public function process(ResponseParameterBag $responseParameters = null, $dataFormatter = null)
+    public function process(ResponseParameterBag $responseParameters = null, $getEntity=false)
     {
         if ($responseParameters === null) {
             $responseParameters = new ResponseParameterBag();
@@ -63,6 +54,7 @@ class ArrayProcessor
      */
     public function setData(array $data)
     {
+        $this->setColumns(array_keys($data));
         $this->data = $data;
     }
 
@@ -72,27 +64,5 @@ class ArrayProcessor
     public function getData()
     {
         return $this->data;
-    }
-
-    /**
-     * setLogger
-     *
-     * @param $logger
-     */
-    public function setLogger(LoggerInterface $logger = null)
-    {
-        $this->logger = $logger;
-    }
-
-    /**
-     * debug
-     *
-     * @param $message
-     */
-    public function debug($message)
-    {
-        if ($this->logger instanceof LoggerInterface) {
-            $this->logger->debug($message);
-        }
     }
 }

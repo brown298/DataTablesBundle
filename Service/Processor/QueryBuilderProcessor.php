@@ -14,22 +14,13 @@ use Psr\Log\LoggerInterface;
  * @package Brown298\DataTablesBundle\Service\Processor
  * @author  John Brown <brown.john@gmail.com>
  */
-class QueryBuilderProcessor
+class QueryBuilderProcessor extends AbstractProcessor implements ProcessorInterface
 {
     /**
      * @var \Doctrine\ORM\QueryBuilder
      */
     protected $queryBuilder;
 
-    /**
-     * @var \Brown298\DataTablesBundle\Model\ResponseParameterBag
-     */
-    protected $responseParameters;
-
-    /**
-     * @var null|PSR\Log|Logger
-     */
-    protected $logger = null;
 
     /**
      * __construct
@@ -40,21 +31,19 @@ class QueryBuilderProcessor
      */
     public function __construct(QueryBuilder $queryBuilder, RequestParameterBag $requestParameters, LoggerInterface $logger = null)
     {
-        $this->logger = $logger;
+        parent::__construct($requestParameters, $logger);
         $this->setQueryBuilder($queryBuilder);
-        $this->requestParameters = $requestParameters;
     }
 
     /**
      * process
      *
      * @param ResponseParameterBag $responseParameters
-     * @param null                 $dataFormatter
      * @param bool                 $getEntity
      *
      * @return ResponseParameterBag
      */
-    public function process(ResponseParameterBag $responseParameters = null, $dataFormatter = null, $getEntity = false)
+    public function process(ResponseParameterBag $responseParameters = null, $getEntity = false)
     {
         if ($responseParameters === null) {
             $responseParameters = new ResponseParameterBag();
@@ -308,48 +297,5 @@ class QueryBuilderProcessor
     public function setLogger(LoggerInterface $logger = null)
     {
         $this->logger = $logger;
-    }
-
-    /**
-     * debug
-     *
-     * @param $message
-     */
-    public function debug($message)
-    {
-        if ($this->logger instanceof LoggerInterface) {
-            $this->logger->debug($message);
-        }
-    }
-
-    /**
-     * addColumn
-     *
-     * @param $name
-     * @param $title
-     */
-    public function addColumn($name, $title)
-    {
-        $this->requestParameters->addColumn($name, $title);
-    }
-
-    /**
-     * setColumns
-     *
-     * @param array $columns
-     */
-    public function setColumns(array $columns)
-    {
-        $this->requestParameters->setColumns($columns);
-    }
-
-    /**
-     * getColumns
-     *
-     * @return array
-     */
-    public function getColumns()
-    {
-        return $this->requestParameters->getColumns();
     }
 }
