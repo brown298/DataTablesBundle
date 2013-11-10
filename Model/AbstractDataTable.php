@@ -8,6 +8,8 @@ use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use \Brown298\DataTablesBundle\Model\DataTable\AbstractDataTable as BaseAbstractDataTable;
+use \Brown298\DataTablesBundle\Model\DataTable\DataTableInterface as BaseDataTableInterface;
 
 /**
  * Class AbstractDataTable
@@ -15,22 +17,13 @@ use Symfony\Component\HttpFoundation\Request;
  * @package Brown298\DataTablesBundle\Model
  * @author  John Brown <brown.john@gmail.com>
  */
-abstract class AbstractDataTable implements DataTableInterface, ContainerAwareInterface
+abstract class AbstractDataTable extends BaseAbstractDataTable implements BaseDataTableInterface,  DataTableInterface, ContainerAwareInterface
 {
-    /**
-     * @var array defintion of the column as DQLName => display
-     */
-    protected $columns = array();
 
     /**
      * @var \Doctrine\ORM\EntityManager
      */
     protected $em = null;
-
-    /**
-     * @var null
-     */
-    protected $dataFormatter = null;
 
     /**
      * @var null
@@ -54,27 +47,6 @@ abstract class AbstractDataTable implements DataTableInterface, ContainerAwareIn
         if ($columns !== null) {
             $this->columns = $columns;
         }
-    }
-
-    /**
-     * getColumns
-     *
-     * @return array
-     */
-    public function getColumns()
-    {
-        return $this->columns;
-    }
-
-    /**
-     * setColumns
-     *
-     * @param array $columns
-     * @return null|void
-     */
-    public function setColumns(array $columns = null)
-    {
-        $this->columns = $columns;
     }
 
     /**
@@ -171,20 +143,7 @@ abstract class AbstractDataTable implements DataTableInterface, ContainerAwareIn
         return new JsonResponse($data);
     }
 
-    /**
-     * isAjaxRequest
-     *
-     * @param Request $request
-     * @return bool
-     */
-    public function isAjaxRequest(Request $request)
-    {
-        if ($request->isXmlHttpRequest()) {
-            return true;
-        }
 
-        return false;
-    }
 
     /**
      * {@inheritDoc}
@@ -209,22 +168,7 @@ abstract class AbstractDataTable implements DataTableInterface, ContainerAwareIn
         return $this->getJsonResponse($request, $dataFormatter);
     }
 
-    /**
-     * @param callable|null $dataFormatter
-     * @return mixed|void
-     */
-    public function setDataFormatter(\Closure $dataFormatter = null)
-    {
-        $this->dataFormatter = $dataFormatter;
-    }
 
-    /**
-     * @return null
-     */
-    public function getDataFormatter()
-    {
-        return $this->dataFormatter;
-    }
 
     /**
      * @param \Doctrine\ORM\EntityManager $em
