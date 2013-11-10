@@ -3,6 +3,7 @@ namespace Brown298\DataTablesBundle\Service;
 
 use Brown298\DataTablesBundle\Model\RequestParameterBag;
 use Brown298\DataTablesBundle\Model\ResponseParameterBag;
+use Brown298\DataTablesBundle\Service\Processor\ProcessorInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\QueryBuilder;
@@ -134,4 +135,26 @@ abstract class AbstractServerProcessor
             $this->logger->debug($message);
         }
     }
+
+    /**
+     * setProcessor
+     *
+     * @param ProcessorInterface $processor
+     */
+    public function setProcessor(ProcessorInterface $processor)
+    {
+        $this->processor = $processor;
+    }
+
+    /**
+     * getProcessor
+     *
+     * @return mixed
+     */
+    public function getProcessor()
+    {
+        return $this->processor;
+    }
+
+
 }

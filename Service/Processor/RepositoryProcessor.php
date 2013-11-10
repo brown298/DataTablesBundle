@@ -4,6 +4,7 @@ namespace Brown298\DataTablesBundle\Service\Processor;
 use Brown298\DataTablesBundle\Model\RequestParameterBag;
 use Brown298\DataTablesBundle\Model\ResponseParameterBag;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -51,6 +52,35 @@ class RepositoryProcessor extends QueryBuilderProcessor implements ProcessorInte
     {
         $this->setRepository($repository);
         parent::__construct($this->queryBuilder, $requestParameters, $logger);
+    }
+
+    /**
+     * Adds support for magic finders.
+     *
+     * @param string $method
+     * @param array  $arguments
+     *
+     * @return array|object The found entity/entities.
+     *
+     * @throws ORMException
+     * @throws \BadMethodCallException If the method called is an invalid find* method
+     *                                 or no find* method at all and therefore an invalid
+     *                                 method call.
+     */
+    public function __call($method, $arguments)
+    {
+        if (!method_exists($this->repository, $method)) {
+            throw new \BadMethodCallException("Method {$method} does not exist on repository");
+        }
+
+        $qb = call_user_func_array(array($this->repository,$method), $arguments);
+
+        if ((!$qb instanceof QueryBuilder)) {
+            throw new \BadMethodCallException("Method {$method} must return a QueryBuilder object");
+        }
+
+        $this->setQueryBuilder($qb);
+        return $qb;
     }
 
     /**

@@ -126,6 +126,25 @@ class ServerProcessService extends AbstractServerProcessor
     }
 
     /**
+     * Adds support for magic finders.
+     *
+     * @param string $method
+     * @param array $arguments
+     *
+     * @throws \Brown298\DataTablesBundle\Exceptions\ProcessorException
+     * @return array|object The found entity/entities.
+     *
+     */
+    public function __call($method, $arguments)
+    {
+        if ($this->processor == null || !($this->processor instanceof RepositoryProcessor)) {
+            Throw new ProcessorException("Generic calls require a Repository Processor, create one by running setRepository");
+        }
+
+        return call_user_func_array(array($this->processor,$method), $arguments);
+    }
+
+    /**
      * findAll
      *
      * builds a findAll Query
