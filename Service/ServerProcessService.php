@@ -8,6 +8,8 @@ use Brown298\DataTablesBundle\Service\AbstractServerProcessor;
 use Brown298\DataTablesBundle\Service\Processor\ArrayProcessor;
 use Brown298\DataTablesBundle\Service\Processor\ProcessorInterface;
 use Brown298\DataTablesBundle\Service\Processor\QueryBuilderProcessor;
+use Brown298\DataTablesBundle\Service\Processor\RepositoryProcessor;
+use Doctrine\ORM\EntityRepository;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\QueryBuilder;
@@ -48,6 +50,7 @@ class ServerProcessService extends AbstractServerProcessor
         return $this->responseParameters->all($dataFormatter);
     }
 
+    /*----------------------------------------Query Builder-----------------------------------------------------------*/
     /**
      * setQueryBuilder
      *
@@ -72,6 +75,7 @@ class ServerProcessService extends AbstractServerProcessor
         return $this->processor->getQueryBuilder();
     }
 
+    /*----------------------------------------Array Processor---------------------------------------------------------*/
     /**
      * @param array $data
      */
@@ -91,6 +95,71 @@ class ServerProcessService extends AbstractServerProcessor
         }
 
         return $this->processor->getData();
+    }
+
+    /*----------------------------------------Repository Processor----------------------------------------------------*/
+
+    /**
+     * setRepository
+     *
+     * creates a repository based processor
+     *
+     * @param EntityRepository $repository
+     */
+    public function setRepository(EntityRepository $repository)
+    {
+        $this->processor = new RepositoryProcessor($repository, $this->requestParameters, $this->logger);
+    }
+
+    /**
+     * getRepository
+     *
+     * @return Processor\Doctrine\ORM\EntityRepository|null
+     */
+    public function getRepository()
+    {
+        if ($this->processor == null || !($this->processor instanceof RepositoryProcessor)) {
+            return null;
+        }
+
+        return $this->processor->getRepository();
+    }
+
+    /**
+     * findAll
+     *
+     * builds a findAll Query
+     *
+     * @throws \Brown298\DataTablesBundle\Exceptions\ProcessorException
+     */
+    public function findAll()
+    {
+        if ($this->processor == null || !($this->processor instanceof RepositoryProcessor)) {
+            Throw new ProcessorException("FindAll requires a Repository Processor, create one by running setRepository");
+        }
+
+        $this->processor->buildFindAll();
+    }
+
+    /**
+     * findBy
+     *
+     * builds a findBy query
+     *
+     * @param array $criteria
+     * @param array $orderBy
+     * @param null $limit
+     * @param null $offset
+     *
+     * @throws \Brown298\DataTablesBundle\Exceptions\ProcessorException
+     */
+    public function findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+    {
+        if ($this->processor == null || !($this->processor instanceof RepositoryProcessor)) {
+            Throw new ProcessorException("FindBy requires a Repository Processor, create one by running setRepository");
+        }
+
+        $this->processor->buildFindBy($criteria, $orderBy, $limit, $offset);
     }
 
 }
