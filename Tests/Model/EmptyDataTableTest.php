@@ -1,7 +1,7 @@
 <?php
 namespace Brown298\DataTablesBundle\Tests\Model;
 
-use Brown298\DataTablesBundle\Model\EmptyDataTable;
+use Brown298\DataTablesBundle\Test\DataTable\EmptyDataTable;
 use Phake;
 use Brown298\DataTablesBundle\Test\AbstractBaseTest;
 
@@ -28,7 +28,7 @@ class EmptyDataTableTest extends AbstractBaseTest
     protected $dataTablesService;
 
     /**
-     * @var Brown298\DataTablesBundle\Model\EmptyDataTable
+     * @var \Brown298\DataTablesBundle\Test\DataTable\EmptyDataTable
      */
     protected $dataTable;
 

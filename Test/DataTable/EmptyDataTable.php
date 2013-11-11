@@ -1,5 +1,5 @@
 <?php
-namespace Brown298\DataTablesBundle\Model;
+namespace Brown298\DataTablesBundle\Test\DataTable;
 
 use Brown298\DataTablesBundle\Model\DataTable\AbstractDataTable as AbstractBaseDataTable;
 use Brown298\DataTablesBundle\Model\DataTable\DataTableInterface as BaseDataTableInterface;

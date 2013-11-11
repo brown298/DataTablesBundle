@@ -18,8 +18,8 @@ abstract class AbstractBaseTest extends PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
+        \Phake::initAnnotations($this);
         parent::setUp();
-        Phake::initAnnotations($this);
     }
 
 

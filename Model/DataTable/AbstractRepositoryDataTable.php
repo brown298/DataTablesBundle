@@ -3,6 +3,7 @@ namespace Brown298\DataTablesBundle\Model\DataTable;
 
 use Brown298\DataTablesBundle\Exceptions\ProcessorException;
 use Brown298\DataTablesBundle\Service\ServerProcessService;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -34,6 +35,10 @@ class AbstractRepositoryDataTable extends AbstractQueryBuilderDataTable implemen
            throw new ProcessorException('The container must be set');
         }
 
+        if (!($this->repository instanceOf EntityRepository)) {
+            throw new ProcessorException('The entity repository must be set');
+        }
+
         $this->serverProcessorService->setRepository($this->repository);
 
         return $this->serverProcessorService->findAll();
@@ -53,6 +58,10 @@ class AbstractRepositoryDataTable extends AbstractQueryBuilderDataTable implemen
     {
         if (!($this->serverProcessorService instanceof ServerProcessService)) {
             throw new ProcessorException('The container must be set');
+        }
+
+        if (!($this->repository instanceOf EntityRepository)) {
+            throw new ProcessorException('The entity repository must be set');
         }
 
         $this->serverProcessorService->setRepository($this->repository);
@@ -75,9 +84,13 @@ class AbstractRepositoryDataTable extends AbstractQueryBuilderDataTable implemen
             throw new ProcessorException('The container must be set');
         }
 
+        if (!($this->repository instanceOf EntityRepository)) {
+            throw new ProcessorException('The entity repository must be set');
+        }
+
         $this->serverProcessorService->setRepository($this->repository);
 
-        return call_user_func_array(array($this->repository,$method), $arguments);
+        return call_user_func_array(array($this->serverProcessorService,$method), $arguments);
     }
 
     /**
