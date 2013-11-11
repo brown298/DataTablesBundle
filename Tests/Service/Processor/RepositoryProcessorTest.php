@@ -63,7 +63,9 @@ class RepositoryProcessorTest extends AbstractBaseTest
         $this->repository         = Phake::mock('\Doctrine\ORM\EntityRepository');
 
         Phake::when($this->repository)->createQueryBuilder(Phake::anyParameters())->thenReturn($this->queryBuilder);
+        Phake::when($this->queryBuilder)->getQuery(Phake::anyParameters())->thenReturn($this->query);
         Phake::when($this->queryBuilder)->andWhere(Phake::anyParameters())->thenReturn($this->queryBuilder);
+        Phake::when($this->queryBuilder)->select(Phake::anyParameters())->thenReturn($this->queryBuilder);
 
         $this->service            = new RepositoryProcessor($this->repository, $this->requestParameters, $this->logger);
 
@@ -151,11 +153,114 @@ class RepositoryProcessorTest extends AbstractBaseTest
 
     /**
      * testAddOrdering
-     * 
+     *
      */
     public function testAddOrdering()
     {
         $this->callProtected($this->service, 'addOrdering', array(array('a.test' => 'desc')));
         Phake::verify($this->queryBuilder)->addOrderBy('a.test', 'desc');
+    }
+
+    /**
+     * testBuildFindBy
+     *
+     */
+    public function testBuildFindBy()
+    {
+        $criteria = array('a.test'=> '123');
+        $orderBy  = array('a.name' => 'asc');
+        $limit    = 10;
+        $offset   = 5;
+
+        $this->service->buildFindBy($criteria, $orderBy, $limit, $offset);
+
+        $this->assertEquals($offset, $this->service->getOffset());
+        $this->assertEquals($limit, $this->service->getLimit());
+        $this->assertEquals($criteria, $this->service->getCriteria());
+        $this->assertEquals($orderBy, $this->service->getOrderBy());
+    }
+
+    /**
+     * testBuildFindAll
+     *
+     */
+    public function testBuildFindAll()
+    {
+        $criteria = array();
+        $orderBy  = null;
+        $limit    = null;
+        $offset   = null;
+
+        $this->service->buildFindALl();
+
+        $this->assertEquals($offset, $this->service->getOffset());
+        $this->assertEquals($limit, $this->service->getLimit());
+        $this->assertEquals($criteria, $this->service->getCriteria());
+        $this->assertEquals($orderBy, $this->service->getOrderBy());
+    }
+
+    /**
+     * testCallThrowsErrorWithoutMethod
+     *
+     * @expectedException \BadMethodCallException
+     */
+    public function testCallThrowsErrorWithoutMethod()
+    {
+        $this->service->aa();
+    }
+
+    /**
+     * testCallDoesNotReturnQueryBuilderThrowsError
+     *
+     * @expectedException \BadMethodCallException
+     */
+    public function testCallDoesNotReturnQueryBuilderThrowsError()
+    {
+        $this->service->getClassName();
+    }
+
+    /**
+     * testGenericCreatesQueryBuilder
+     *
+     */
+    public function testGenericCreatesQueryBuilder()
+    {
+        Phake::when($this->repository)->getClassName()->thenReturn($this->queryBuilder);
+
+        $this->assertEquals($this->queryBuilder, $this->service->getClassName());
+    }
+
+    /**
+     * testProcessEmpty
+     *
+     */
+    public function testProcessEmpty()
+    {
+        Phake::when($this->query)->getArrayResult()->thenReturn(array(array(2)));
+        $result = $this->service->process($this->responseParameters);
+        Phake::verify($this->requestParameters, Phake::never())->setOffset(Phake::anyParameters());
+        Phake::verify($this->requestParameters, Phake::never())->setDisplayLength(Phake::anyParameters());
+    }
+
+    /**
+     * testProcessOffset
+     *
+     */
+    public function testProcessOffset()
+    {
+        Phake::when($this->query)->getArrayResult()->thenReturn(array(array(2)));
+        $this->service->setOffset(2);
+        $result = $this->service->process($this->responseParameters);
+        Phake::verify($this->requestParameters)->setOffset(Phake::anyParameters());
+        Phake::verify($this->requestParameters, Phake::never())->setDisplayLength(Phake::anyParameters());
+    }
+
+    public function testProcessDisplayLength()
+    {
+        $this->service->setLimit(2);
+        Phake::when($this->query)->getArrayResult()->thenReturn(array(array(2)));
+        $result = $this->service->process($this->responseParameters);
+        Phake::verify($this->requestParameters, Phake::never())->setOffset(Phake::anyParameters());
+        Phake::verify($this->requestParameters)->setDisplayLength(Phake::anyParameters());
     }
 }
