@@ -30,12 +30,12 @@ class ServerProcessServiceTest extends AbstractBaseTest
     protected $request;
 
     /**
-     * @var Brown298\DataTablesBundle\Model\RequestParameterBag
+     * @var \Brown298\DataTablesBundle\Model\RequestParameterBag
      */
     protected $requestParameters;
 
     /**
-     * @var Psr\Log\LoggerInterface
+     * @var \Psr\Log\LoggerInterface
      */
     protected $logger;
 
@@ -43,6 +43,16 @@ class ServerProcessServiceTest extends AbstractBaseTest
      * @var \Brown298\DataTablesBundle\Service\ServerProcessService
      */
     protected $service;
+
+    /**
+     * @var \Brown298\DataTablesBundle\Service\Processor\ProcessorInterface
+     */
+    protected $processor;
+
+    /**
+     * @var \Doctrine\ORM\EntityRepository
+     */
+    protected $repository;
 
     /**
      * setUp
@@ -57,6 +67,10 @@ class ServerProcessServiceTest extends AbstractBaseTest
         $this->query             = Phake::mock('Doctrine\ORM\AbstractQuery');
         $this->requestParameters = Phake::mock('Brown298\DataTablesBundle\Model\RequestParameterBag');
         $this->logger            = Phake::mock('Psr\Log\LoggerInterface');
+        $this->processor         = Phake::mock('Brown298\DataTablesBundle\Service\Processor\ProcessorInterface');
+        $this->repository        = Phake::mock('\Doctrine\ORM\EntityRepository');
+
+        Phake::when($this->repository)->createQueryBuilder(Phake::anyParameters())->thenReturn($this->queryBuilder);
 
         $this->service->setRequest($this->request);
     }
@@ -306,4 +320,101 @@ class ServerProcessServiceTest extends AbstractBaseTest
         Phake::verify($this->queryBuilder)->getDQLPart('select');
     }
 
+    /**
+     * testGetSetProcessor
+     *
+     */
+    public function testGetSetProcessor()
+    {
+        $this->service->setProcessor($this->processor);
+        $this->assertEquals($this->processor, $this->service->getProcessor());
+    }
+
+    /**
+     * testGetSetRepository
+     *
+     */
+    public function testGetSetRepository()
+    {
+        $this->service->setRepository($this->repository);
+        $this->assertEquals($this->repository, $this->service->getRepository());
+    }
+
+    /**
+     * testGetRepositoryReturnsNullWithoutProcessor
+     *
+     */
+    public function testGetRepositoryReturnsNullWithoutProcessor()
+    {
+        $this->assertNull($this->service->getRepository());
+    }
+
+    /**
+     * testFindAllThrowsErrorWithoutProcessor
+     *
+     * @expectedException \Brown298\DataTablesBundle\Exceptions\ProcessorException
+     */
+    public function testFindAllThrowsErrorWithoutProcessor()
+    {
+        $this->service->findAll();
+    }
+
+    /**
+     * testFindByThrowsErrorWithoutProcessor
+     *
+     * @expectedException \Brown298\DataTablesBundle\Exceptions\ProcessorException
+     */
+    public function testFindByThrowsErrorWithoutProcessor()
+    {
+        $this->service->findBy(array());
+    }
+
+    /**
+     * testGenericThrowsErrorWithoutProcessor
+     *
+     * @expectedException \Brown298\DataTablesBundle\Exceptions\ProcessorException
+     */
+    public function testGenericThrowsErrorWithoutProcessor()
+    {
+        $this->service->aaaaaaaa();
+    }
+
+    /**
+     * testGenericCallsProcessor
+     *
+     */
+    public function testGenericCallsProcessor()
+    {
+        $this->processor = Phake::mock('Brown298\DataTablesBundle\Service\Processor\RepositoryProcessor');
+        $this->service->setProcessor($this->processor);
+        $this->service->aaaa();
+
+        Phake::verify($this->processor)->aaaa();
+    }
+
+    /**
+     * testFindAllCallsProcessor
+     *
+     */
+    public function testFindAllCallsProcessor()
+    {
+        $this->processor = Phake::mock('Brown298\DataTablesBundle\Service\Processor\RepositoryProcessor');
+        $this->service->setProcessor($this->processor);
+        $this->service->findAll();
+
+        Phake::verify($this->processor)->buildFindAll();
+    }
+
+    /**
+     * testFindByCallsProcessor
+     *
+     */
+    public function testFindByCallsProcessor()
+    {
+        $this->processor = Phake::mock('Brown298\DataTablesBundle\Service\Processor\RepositoryProcessor');
+        $this->service->setProcessor($this->processor);
+        $this->service->findBy(array());
+
+        Phake::verify($this->processor)->buildFindBy(Phake::anyParameters());
+    }
 }

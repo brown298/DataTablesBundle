@@ -48,7 +48,7 @@ class RepositoryProcessor extends QueryBuilderProcessor implements ProcessorInte
      * @param RequestParameterBag $requestParameters
      * @param LoggerInterface $logger
      */
-    public function __construct(EntityRepository $repository, RequestParameterBag $requestParameters, LoggerInterface $logger )
+    public function __construct(EntityRepository $repository, RequestParameterBag $requestParameters, LoggerInterface $logger = null )
     {
         $this->setRepository($repository);
         parent::__construct($this->queryBuilder, $requestParameters, $logger);
