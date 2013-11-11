@@ -44,4 +44,35 @@ interface DataTableInterface
      * @return mixed
      */
     public function getDataFormatter();
+
+    /**
+     * getData
+     *
+     * @param Request $request
+     *
+     * @return mixed
+     */
+    public function getData(Request $request);
+
+    /**
+     * getJsonResponse
+     *
+     * @param Request $request
+     * @param callable|null $dataFormatter
+     *
+     * @return mixed
+     */
+    public function getJsonResponse(Request $request, \Closure $dataFormatter = null);
+
+    /**
+     * processRequest
+     *
+     * processes a request and returns the appropriate response
+     *
+     * @param Request $request
+     * @param callable $dataFormatter
+     * @return mixed false if not an ajax request
+     */
+    public function processRequest(Request $request, \Closure $dataFormatter = null);
+
 }
