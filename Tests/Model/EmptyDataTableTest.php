@@ -1,7 +1,7 @@
 <?php
 namespace Brown298\DataTablesBundle\Tests\Model;
 
-use Brown298\DataTablesBundle\Model\EmptyDataTable;
+use Brown298\DataTablesBundle\Test\DataTable\EmptyDataTable;
 use Phake;
 use Brown298\DataTablesBundle\Test\AbstractBaseTest;
 
@@ -12,17 +12,6 @@ use Brown298\DataTablesBundle\Test\AbstractBaseTest;
  */
 class EmptyDataTableTest extends AbstractBaseTest
 {
-
-    /**
-     * @var Doctrine\ORM\EntityManager
-     */
-    protected $em;
-
-    /**
-     * @var Doctrine\ORM\QueryBuilder
-     */
-    protected $queryBuilder;
-
     /**
      * @var Symfony\Component\DependencyInjection\ContainerInterface
      */
@@ -39,7 +28,7 @@ class EmptyDataTableTest extends AbstractBaseTest
     protected $dataTablesService;
 
     /**
-     * @var Brown298\DataTablesBundle\Model\EmptyDataTable
+     * @var \Brown298\DataTablesBundle\Test\DataTable\EmptyDataTable
      */
     protected $dataTable;
 
@@ -54,8 +43,6 @@ class EmptyDataTableTest extends AbstractBaseTest
     public function setUp()
     {
         parent::setUp();
-        $this->em                = Phake::mock('Doctrine\ORM\EntityManager');
-        $this->queryBuilder      = Phake::mock('Doctrine\ORM\QueryBuilder');
         $this->container         = Phake::mock('Symfony\Component\DependencyInjection\ContainerInterface');
         $this->request           = Phake::mock('Symfony\Component\HttpFoundation\Request');
         $this->dataTablesService = Phake::mock('Brown298\DataTablesBundle\Service\ServerProcessService');
@@ -63,7 +50,7 @@ class EmptyDataTableTest extends AbstractBaseTest
 
         Phake::when($this->container)->get('logger')->thenReturn($this->logger);
 
-        $this->dataTable = new EmptyDataTable($this->em);
+        $this->dataTable = new EmptyDataTable();
     }
 
     /**
@@ -73,7 +60,7 @@ class EmptyDataTableTest extends AbstractBaseTest
     {
         $columns = array('test');
 
-        $this->dataTable = new EmptyDataTable($this->em, $columns);
+        $this->dataTable = new EmptyDataTable($columns);
 
         $this->assertEquals($columns, $this->dataTable->getColumns());
     }
@@ -91,31 +78,12 @@ class EmptyDataTableTest extends AbstractBaseTest
     }
 
     /**
-     * testGetSetEm
-     */
-    public function testGetSetEm()
-    {
-        $this->dataTable->setEm($this->em);
-
-        $this->assertEquals($this->em, $this->dataTable->getEm());
-    }
-
-    /**
      * testSetContainer
      */
     public function testSetContainer()
     {
         $this->dataTable->setContainer($this->container);
         $this->assertEquals($this->container, $this->getProtectedValue($this->dataTable, 'container'));
-    }
-
-    /**
-     * testSetQueryBuilder
-     */
-    public function testSetQueryBuilder()
-    {
-        $this->dataTable->setQueryBuilder($this->queryBuilder);
-        $this->assertEquals($this->queryBuilder, $this->getProtectedValue($this->dataTable, 'queryBuilder'));
     }
 
     /**
@@ -137,15 +105,6 @@ class EmptyDataTableTest extends AbstractBaseTest
     }
 
     /**
-     * testGetQueryBuilder
-     */
-    public function testGetQueryBuilder()
-    {
-        $this->setProtectedValue($this->dataTable, 'queryBuilder', $this->queryBuilder);
-        $this->assertEquals($this->queryBuilder, $this->dataTable->getQueryBuilder($this->request));
-    }
-
-    /**
      * testGetSetDataFormatter
      */
     public function testGetSetDataFormatter()
@@ -157,41 +116,10 @@ class EmptyDataTableTest extends AbstractBaseTest
     }
 
     /**
-     * testGetDatByQueryBuilderEmptyColumns
-     */
-    public function testGetDatByQueryBuilderEmptyColumns()
-    {
-        Phake::when($this->container)->has('logger')->thenReturn(true);
-        Phake::when($this->container)->get('data_tables.service')->thenReturn($this->dataTablesService);
-        $this->dataTable->setContainer($this->container);
-
-        $this->callProtected($this->dataTable, 'getDataByQueryBuilder', array($this->request, $this->queryBuilder, null));
-
-        Phake::verify($this->container)->get('logger');
-        Phake::verify($this->dataTablesService)->process(null, false);
-        Phake::verify($this->dataTablesService)->setRequest($this->request);
-        Phake::verify($this->dataTablesService)->setColumns(array());
-    }
-
-    /**
      * testGetJsonResponseNullFormatter
      */
     public function testGetJsonResponseNullFormatter()
     {
-        $result = $this->dataTable->getJsonResponse($this->request);
-
-        $this->assertInstanceOf('Symfony\Component\HttpFoundation\JsonResponse', $result);
-    }
-
-    /**
-     * testGetJsonResponseQBNullFormatter
-     */
-    public function testGetJsonResponseQBNullFormatter()
-    {
-        $this->dataTable->setQueryBuilder($this->queryBuilder);
-        $this->dataTable->setContainer($this->container);
-        Phake::when($this->container)->get('data_tables.service')->thenReturn($this->dataTablesService);
-
         $result = $this->dataTable->getJsonResponse($this->request);
 
         $this->assertInstanceOf('Symfony\Component\HttpFoundation\JsonResponse', $result);

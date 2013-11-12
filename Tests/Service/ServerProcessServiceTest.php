@@ -30,12 +30,12 @@ class ServerProcessServiceTest extends AbstractBaseTest
     protected $request;
 
     /**
-     * @var Brown298\DataTablesBundle\Model\RequestParameterBag
+     * @var \Brown298\DataTablesBundle\Model\RequestParameterBag
      */
     protected $requestParameters;
 
     /**
-     * @var Psr\Log\LoggerInterface
+     * @var \Psr\Log\LoggerInterface
      */
     protected $logger;
 
@@ -43,6 +43,16 @@ class ServerProcessServiceTest extends AbstractBaseTest
      * @var \Brown298\DataTablesBundle\Service\ServerProcessService
      */
     protected $service;
+
+    /**
+     * @var \Brown298\DataTablesBundle\Service\Processor\ProcessorInterface
+     */
+    protected $processor;
+
+    /**
+     * @var \Doctrine\ORM\EntityRepository
+     */
+    protected $repository;
 
     /**
      * setUp
@@ -57,6 +67,10 @@ class ServerProcessServiceTest extends AbstractBaseTest
         $this->query             = Phake::mock('Doctrine\ORM\AbstractQuery');
         $this->requestParameters = Phake::mock('Brown298\DataTablesBundle\Model\RequestParameterBag');
         $this->logger            = Phake::mock('Psr\Log\LoggerInterface');
+        $this->processor         = Phake::mock('Brown298\DataTablesBundle\Service\Processor\ProcessorInterface');
+        $this->repository        = Phake::mock('\Doctrine\ORM\EntityRepository');
+
+        Phake::when($this->repository)->createQueryBuilder(Phake::anyParameters())->thenReturn($this->queryBuilder);
 
         $this->service->setRequest($this->request);
     }
@@ -77,6 +91,14 @@ class ServerProcessServiceTest extends AbstractBaseTest
         $data = array('test');
         $this->service->setData($data);
         $this->assertEquals($data, $this->service->getData());
+    }
+
+    /**
+     * testGetDataNoProcessorReturnsNull
+     */
+    public function testGetDataNoProcessorReturnsNull()
+    {
+        $this->assertNull($this->service->getData());
     }
 
     /**
@@ -115,68 +137,6 @@ class ServerProcessServiceTest extends AbstractBaseTest
         $this->assertEquals(array('test'=>'123'), $this->service->getColumns());
     }
 
-    /**
-     * testAddOrderNoSortingDoesNothing
-     */
-    public function testAddOrderNoSortingDoesNothing()
-    {
-        $this->assertEquals($this->queryBuilder, $this->service->addOrder($this->queryBuilder));
-    }
-
-    /**
-     * testAddOrderWithSortingAddsToQueryBuilder
-     */
-    public function testAddOrderWithSortingAddsToQueryBuilder()
-    {
-        $this->setProtectedValue($this->service, 'requestParameters', $this->requestParameters);
-        Phake::when($this->requestParameters)->getSortingColumns()->thenReturn(array('test'=> 'asc'));
-
-        $this->service->addOrder($this->queryBuilder);
-
-        Phake::verify($this->queryBuilder)->addOrderBy('test','asc');
-    }
-
-    /**
-     * testAddOffsetEmptyDoesNothing
-     */
-    public function testAddOffsetEmptyDoesNothing()
-    {
-        $this->assertEquals($this->queryBuilder, $this->service->addOffset($this->queryBuilder));
-    }
-
-    /**
-     * testAddOffsetAddsToQueryBuilder
-     */
-    public function testAddOffsetAddsToQueryBuilder()
-    {
-        $this->setProtectedValue($this->service, 'requestParameters', $this->requestParameters);
-        Phake::when($this->requestParameters)->getOffset()->thenReturn(2);
-
-        $this->service->addOffset($this->queryBuilder);
-
-        Phake::verify($this->queryBuilder)->setFirstResult(2);
-    }
-
-    /**
-     * testAddLimitsEmptyDoesNothing
-     */
-    public function testAddLimitsEmptyDoesNothing()
-    {
-        $this->assertEquals($this->queryBuilder, $this->service->addLimits($this->queryBuilder));
-    }
-
-    /**
-     * testAddLimitAddsToQueryBuilder
-     */
-    public function testAddLimitAddsToQueryBuilder()
-    {
-        $this->setProtectedValue($this->service, 'requestParameters', $this->requestParameters);
-        Phake::when($this->requestParameters)->getDisplayLength()->thenReturn(2);
-
-        $this->service->addLimits($this->queryBuilder);
-
-        Phake::verify($this->queryBuilder)->setMaxResults(2);
-    }
 
     /**
      * testGetResponseParameters
@@ -191,216 +151,6 @@ class ServerProcessServiceTest extends AbstractBaseTest
         $this->assertEquals($responseParameters, $this->service->getResponseParameters());
     }
 
-    /**
-     * testAddSearchWithoutParameters
-     *
-     * test that the search without criteria returns the original querybuilder
-     */
-    public function testAddSearchWithoutParameters()
-    {
-        $results = $this->service->addSearch($this->queryBuilder);
-
-        $this->assertEquals($this->queryBuilder, $results);
-        Phake::verify($this->queryBuilder, Phake::never())->andWhere(Phake::anyParameters());
-    }
-
-    /**
-     * testAddSearchWithSingleParameter
-     *
-     * ensures a parameter gets added
-     */
-    public function testAddSearchWithSingleParameter()
-    {
-        $columns = array(
-            'a.id' => 'test',
-        );
-        Phake::when($this->requestParameters)->getSearchColumns()->thenReturn($columns);
-        $this->setProtectedValue($this->service,'requestParameters', $this->requestParameters);
-
-        $results = $this->service->addSearch($this->queryBuilder);
-
-        $this->assertEquals($this->queryBuilder, $results);
-        Phake::verify($this->queryBuilder)->andWhere('a.id LIKE :a_id');
-        Phake::verify($this->queryBuilder)->setParameter('a_id', '%test%');
-    }
-
-    /**
-     * testAddSearchWithMultipleParametersUsesOr
-     *
-     * ensures when multiple columns are being searched, they are or joined
-     */
-    public function testAddSearchWithMultipleParametersUsesAnd()
-    {
-        $columns = array(
-            'a.id'   => 'test',
-            'b.name' => '123',
-        );
-        Phake::when($this->requestParameters)->getSearchColumns()->thenReturn($columns);
-        $this->setProtectedValue($this->service,'requestParameters', $this->requestParameters);
-
-        $results = $this->service->addSearch($this->queryBuilder);
-
-        $this->assertEquals($this->queryBuilder, $results);
-        Phake::verify($this->queryBuilder)->andWhere('a.id LIKE :a_id and b.name LIKE :b_name');
-        Phake::verify($this->queryBuilder)->setParameter('a_id', '%test%');
-        Phake::verify($this->queryBuilder)->setParameter('b_name', '%123%');
-    }
-
-    /**
-     * testGetTotalRecords
-     */
-    public function testGetTotalRecords()
-    {
-        $expectedResults = 2;
-        Phake::when($this->queryBuilder)->getQuery()->thenReturn($this->query);
-        Phake::when($this->queryBuilder)->select(Phake::anyParameters())->thenReturn($this->queryBuilder);
-        Phake::when($this->query)->getArrayResult()->thenReturn(array(array($expectedResults)));
-
-        $result = $this->service->getTotalRecords($this->queryBuilder, 's');
-        Phake::verify($this->queryBuilder)->select(array('count(s.id)'));
-        Phake::verify($this->queryBuilder)->setMaxResults(1);
-
-        $this->assertEquals($expectedResults, $result);
-    }
-
-    /**
-     * testParseColumnsEmptySelect
-     */
-    public function testParseColumnsEmptySelect()
-    {
-        $selects = array();
-        $this->setProtectedValue($this->service, 'requestParameters', $this->requestParameters);
-        Phake::when($this->queryBuilder)->getDQLPart('select')->thenReturn($selects);
-
-        $this->service->parseColumns($this->queryBuilder);
-
-        Phake::verify($this->requestParameters, Phake::never())->addColumn(Phake::anyParameters());
-    }
-
-    /**
-     * testParseColumnsWithSelectNoAs
-     *
-     * ensures that the query runs when the select does not contain an alias
-     */
-    public function testParseColumnsWithSelectNoAs()
-    {
-        $selects = array(
-            array('a.id'),
-        );
-        $this->setProtectedValue($this->service, 'requestParameters', $this->requestParameters);
-        Phake::when($this->queryBuilder)->getDQLPart('select')->thenReturn($selects);
-
-        $this->service->parseColumns($this->queryBuilder);
-
-        Phake::verify($this->requestParameters)->addColumn('a.id','a.id');
-    }
-
-    /**
-     * testParseColumnsWithSelectAs
-     */
-    public function testParseColumnsWithSelectAs()
-    {
-        $selects = array(
-            array('a.id as ai'),
-        );
-        $this->setProtectedValue($this->service, 'requestParameters', $this->requestParameters);
-        Phake::when($this->queryBuilder)->getDQLPart('select')->thenReturn($selects);
-
-        $this->service->parseColumns($this->queryBuilder);
-
-        Phake::verify($this->requestParameters)->addColumn('a.id','ai');
-    }
-
-    /**
-     * testSetQueryBuilder
-     */
-    public function testSetQueryBuilder()
-    {
-        Phake::when($this->queryBuilder)->getDQLPart('select')->thenReturn(array());
-        $this->service->setQueryBuilder($this->queryBuilder);
-
-        $this->assertEquals($this->queryBuilder, $this->getProtectedValue($this->service, 'queryBuilder'));
-
-        // ensure we parse the columsn
-        Phake::verify($this->queryBuilder)->getDQLPart('select');
-    }
-
-    /**
-     * testBuildQuery
-     */
-    public function testBuildQuery()
-    {
-        Phake::when($this->requestParameters)->getSortingColumns()->thenReturn(array());
-        Phake::when($this->requestParameters)->getColumns()->thenReturn(array());
-        Phake::when($this->requestParameters)->getSearchColumns()->thenReturn(array());
-        Phake::when($this->queryBuilder)->getQuery()->thenReturn($this->query);
-        $this->setProtectedValue($this->service, 'requestParameters', $this->requestParameters);
-        $this->setProtectedValue($this->service, 'queryBuilder', $this->queryBuilder);
-        $result = $this->service->buildQuery();
-
-        $this->assertEquals($this->queryBuilder, $result);
-
-        // verify addSearch
-        Phake::verify($this->requestParameters)->getSearchColumns();
-
-        // verify addOrder
-        Phake::verify($this->requestParameters)->getSortingColumns();
-
-        // verify addOffset
-        Phake::verify($this->requestParameters)->getOffset();
-
-        // verify addLimits
-        Phake::verify($this->requestParameters)->getDisplayLength();
-    }
-
-    /**
-     * testProcessQueryBuilder
-     *
-     * test that the process works with a query builder
-     */
-    public function testProcessQueryBuilder()
-    {
-        $dataFormatter = null;
-        $this->setProtectedValue($this->service, 'queryBuilder', $this->queryBuilder);
-        Phake::when($this->queryBuilder)->select(Phake::anyParameters())->thenReturn($this->queryBuilder);
-        Phake::when($this->queryBuilder)->getQuery()->thenReturn($this->query);
-        Phake::when($this->query)->getArrayResult()->thenReturn(array())->thenReturn(array(array()));
-
-        $result = $this->service->process($dataFormatter);
-
-        $this->assertEquals(array(
-            'sEcho'                => null,
-            'iTotalRecords'        => null,
-            'iTotalDisplayRecords' => null,
-            'aaData'               => array(),
-        ), $result);
-    }
-
-    /**
-     * testProcessQueryBuilderEntity
-     *
-     * test that the process works with a query builder requesting an entity
-     */
-    public function testProcessQueryBuilderEntity()
-    {
-        $dataFormatter = null;
-        $this->setProtectedValue($this->service, 'queryBuilder', $this->queryBuilder);
-        Phake::when($this->queryBuilder)->select(Phake::anyParameters())->thenReturn($this->queryBuilder);
-        Phake::when($this->queryBuilder)->getQuery()->thenReturn($this->query);
-        Phake::when($this->query)->getArrayResult()->thenReturn(array(array()));
-        Phake::when($this->query)->getResult()->thenReturn(array());
-
-        $result = $this->service->process($dataFormatter, true);
-
-        $this->assertEquals(array(
-            'sEcho'                => null,
-            'iTotalRecords'        => null,
-            'iTotalDisplayRecords' => null,
-            'aaData'               => array(),
-        ), $result);
-
-        Phake::verify($this->query)->getResult();
-    }
 
     /**
      * testProcessWithDataEmpty
@@ -480,64 +230,191 @@ class ServerProcessServiceTest extends AbstractBaseTest
     }
 
     /**
-     * testGenericSearchNoColumns
-     */
-    public function testGenericSearchNoColumns()
-    {
-        Phake::when($this->requestParameters)->getSearchString()->thenReturn('test');
-        Phake::when($this->requestParameters)->getColumns()->thenReturn(array());
-        $this->setProtectedValue($this->service, 'requestParameters', $this->requestParameters);
-        $this->service->setLogger($this->logger);
-
-        $result = $this->service->addGenericSearch($this->queryBuilder);
-
-        $this->assertEquals($this->queryBuilder, $result);
-        Phake::verify($this->logger)->debug('sSearch: test');
-    }
-
-    /**
-     * testGenericSearchColumn
+     * testProcessQueryBuilder
      *
-     * tests a single search colmn
+     * test that the process works with a query builder
      */
-    public function testGenericSearchColumn()
+    public function testProcessQueryBuilder()
     {
-        $columns = array(
-            'a.id' => 'ID',
-        );
-        Phake::when($this->requestParameters)->getSearchString()->thenReturn('test');
-        Phake::when($this->requestParameters)->getColumns()->thenReturn($columns);
-        $this->setProtectedValue($this->service, 'requestParameters', $this->requestParameters);
-        $this->service->setLogger($this->logger);
+        $dataFormatter = null;
+        $this->service->setQueryBuilder($this->queryBuilder);
+        Phake::when($this->queryBuilder)->select(Phake::anyParameters())->thenReturn($this->queryBuilder);
+        Phake::when($this->queryBuilder)->getQuery()->thenReturn($this->query);
+        Phake::when($this->query)->getArrayResult()->thenReturn(array())->thenReturn(array(array()));
 
-        $result = $this->service->addGenericSearch($this->queryBuilder);
+        $result = $this->service->process($dataFormatter);
 
-        $this->assertEquals($this->queryBuilder, $result);
-        Phake::verify($this->logger)->debug('sSearch: test');
-        Phake::verify($this->queryBuilder)->setParameter('a_id_search', '%test%');
-        Phake::verify($this->queryBuilder)->andWhere('a.id LIKE :a_id_search');
+        $this->assertEquals(array(
+            'sEcho'                => null,
+            'iTotalRecords'        => null,
+            'iTotalDisplayRecords' => null,
+            'aaData'               => array(),
+        ), $result);
     }
 
     /**
-     * testGenericSearchColumns
+     * testGetQueryBuilderNoProcessorReturnsNull
      */
-    public function testGenericSearchColumns()
+    public function testGetQueryBuilderNoProcessorReturnsNull()
     {
-        $columns = array(
-            'a.id'   => 'ID',
-            'a.name' => 'Name',
-        );
-        Phake::when($this->requestParameters)->getSearchString()->thenReturn('test');
-        Phake::when($this->requestParameters)->getColumns()->thenReturn($columns);
-        $this->setProtectedValue($this->service, 'requestParameters', $this->requestParameters);
-        $this->service->setLogger($this->logger);
+        $this->assertNull($this->service->getQueryBuilder());
+    }
 
-        $result = $this->service->addGenericSearch($this->queryBuilder);
+    /**
+     * testGetQueryBuilderReturnsQueryBuilder
+     */
+    public function testGetQueryBuilderReturnsQueryBuilder()
+    {
+        $this->service->setQueryBuilder($this->queryBuilder);
+        $this->assertEquals($this->queryBuilder, $this->service->getQueryBuilder());
+    }
 
-        $this->assertEquals($this->queryBuilder, $result);
-        Phake::verify($this->logger)->debug('sSearch: test');
-        Phake::verify($this->queryBuilder)->setParameter('a_id_search', '%test%');
-        Phake::verify($this->queryBuilder)->setParameter('a_name_search', '%test%');
-        Phake::verify($this->queryBuilder)->andWhere('a.id LIKE :a_id_search or a.name LIKE :a_name_search');
+    /**
+     * testProcessThrowsErrorWithoutProcessorDefined
+     *
+     * @expectedException Brown298\DataTablesBundle\Exceptions\ProcessorException
+     */
+    public function testProcessThrowsErrorWithoutProcessorDefined()
+    {
+        $this->service->process();
+    }
+
+    /**
+     * testProcessQueryBuilderEntity
+     *
+     * test that the process works with a query builder requesting an entity
+     */
+    public function testProcessQueryBuilderEntity()
+    {
+        $dataFormatter = null;
+        $this->service->setQueryBuilder($this->queryBuilder);
+        Phake::when($this->queryBuilder)->select(Phake::anyParameters())->thenReturn($this->queryBuilder);
+        Phake::when($this->queryBuilder)->getQuery()->thenReturn($this->query);
+        Phake::when($this->query)->getArrayResult()->thenReturn(array(array()));
+        Phake::when($this->query)->getResult()->thenReturn(array());
+
+        $result = $this->service->process($dataFormatter, true);
+
+        $this->assertEquals(array(
+            'sEcho'                => null,
+            'iTotalRecords'        => null,
+            'iTotalDisplayRecords' => null,
+            'aaData'               => array(),
+        ), $result);
+
+        Phake::verify($this->query)->getResult();
+    }
+
+    /**
+     * testSetQueryBuilder
+     */
+    public function testSetQueryBuilder()
+    {
+        Phake::when($this->queryBuilder)->getDQLPart('select')->thenReturn(array());
+        $this->service->setQueryBuilder($this->queryBuilder);
+
+        $processor = $this->getProtectedValue($this->service, 'processor');
+        $this->assertEquals($this->queryBuilder, $this->getProtectedValue($processor, 'queryBuilder'));
+
+        // ensure we parse the columsn
+        Phake::verify($this->queryBuilder)->getDQLPart('select');
+    }
+
+    /**
+     * testGetSetProcessor
+     *
+     */
+    public function testGetSetProcessor()
+    {
+        $this->service->setProcessor($this->processor);
+        $this->assertEquals($this->processor, $this->service->getProcessor());
+    }
+
+    /**
+     * testGetSetRepository
+     *
+     */
+    public function testGetSetRepository()
+    {
+        $this->service->setRepository($this->repository);
+        $this->assertEquals($this->repository, $this->service->getRepository());
+    }
+
+    /**
+     * testGetRepositoryReturnsNullWithoutProcessor
+     *
+     */
+    public function testGetRepositoryReturnsNullWithoutProcessor()
+    {
+        $this->assertNull($this->service->getRepository());
+    }
+
+    /**
+     * testFindAllThrowsErrorWithoutProcessor
+     *
+     * @expectedException \Brown298\DataTablesBundle\Exceptions\ProcessorException
+     */
+    public function testFindAllThrowsErrorWithoutProcessor()
+    {
+        $this->service->findAll();
+    }
+
+    /**
+     * testFindByThrowsErrorWithoutProcessor
+     *
+     * @expectedException \Brown298\DataTablesBundle\Exceptions\ProcessorException
+     */
+    public function testFindByThrowsErrorWithoutProcessor()
+    {
+        $this->service->findBy(array());
+    }
+
+    /**
+     * testGenericThrowsErrorWithoutProcessor
+     *
+     * @expectedException \Brown298\DataTablesBundle\Exceptions\ProcessorException
+     */
+    public function testGenericThrowsErrorWithoutProcessor()
+    {
+        $this->service->aaaaaaaa();
+    }
+
+    /**
+     * testGenericCallsProcessor
+     *
+     */
+    public function testGenericCallsProcessor()
+    {
+        $this->processor = Phake::mock('Brown298\DataTablesBundle\Service\Processor\RepositoryProcessor');
+        $this->service->setProcessor($this->processor);
+        $this->service->aaaa();
+
+        Phake::verify($this->processor)->aaaa();
+    }
+
+    /**
+     * testFindAllCallsProcessor
+     *
+     */
+    public function testFindAllCallsProcessor()
+    {
+        $this->processor = Phake::mock('Brown298\DataTablesBundle\Service\Processor\RepositoryProcessor');
+        $this->service->setProcessor($this->processor);
+        $this->service->findAll();
+
+        Phake::verify($this->processor)->buildFindAll();
+    }
+
+    /**
+     * testFindByCallsProcessor
+     *
+     */
+    public function testFindByCallsProcessor()
+    {
+        $this->processor = Phake::mock('Brown298\DataTablesBundle\Service\Processor\RepositoryProcessor');
+        $this->service->setProcessor($this->processor);
+        $this->service->findBy(array());
+
+        Phake::verify($this->processor)->buildFindBy(Phake::anyParameters());
     }
 }

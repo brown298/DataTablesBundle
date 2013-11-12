@@ -66,6 +66,7 @@ Currently dataTables can paginate :
 #### Controller
 
 ```php
+use Symfony\Component\HttpFoundation\Request;
 use Brown298\DataTablesBundle\Controller\AbstractController;
 
 class DefaultController extends AbstractController
@@ -234,10 +235,11 @@ class DefaultController extends Controller
     public function indexAction()
     {
         $request   = $this->getRequest();
+        $em        = $this->get('doctrine.orm.entity_manager');
 
         // process the data table
         $dataTable = new UserTable($em);
-        $dataTable->setContainer($this->getContainer());
+        $dataTable->setContainer($this->container);
         if ($response = $dataTable->ProcessRequest($request)) {
             return $response;
         }
