@@ -171,14 +171,14 @@ controller very clean.
 
 #### Model
 ```php
-class UserTable extens AbstractDataTable implements DataTableInterface
+class UserTable extends AbstractDataTable implements DataTableInterface
 {
     /**
      * @var array
      */
     protected $columns = array(
         'user.id'   => 'Id',
-        'user.name' => 'Name,
+        'user.name' => 'Name',
     );
 
     /**
