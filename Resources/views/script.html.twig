@@ -1,46 +1,8 @@
 <script type="text/javascript">
-    var {{ params['id'] }}_dataTable = {};
+    var {{ rawParams['id'] }}_dataTable = {};
     jQuery(document).ready(function() {
         {% spaceless %}
-        {{ params['id'] }}_dataTable = jQuery('#{{ params['id'] }}').dataTable( {
-            "bProcessing":     {{ params['bProcessing']|raw }},
-            "bLengthChange":   {{ params['bLengthChange']|raw }},
-            "bFilter":         {{ params['bFilter']|raw }},
-            "sPaginationType": "{{ params['sPaginationType']|raw }}",
-            "bSort":           {{ params['bSort']|raw }},
-            "bInfo":           {{ params['bInfo']|raw }},
-            "bPaginate":       {{ params['bPaginate']|raw }},
-            "iDisplayLength":  {{ params['iDisplayLength']|raw }},
-            {% if params['path']|length > 0 %}
-                "sAjaxSource":     "{{ params['path']|raw }}",
-            {% endif %}
-            {% if params['aaSorting'] is defined and params['aaSorting']|length > 0 %}
-                "aaSorting": {{ params['aaSorting']|json_encode()|raw }},
-            {% endif %}
-            {% if params['bServerSide'] %}
-                "bServerSide":     {{ params['bServerSide']|raw }},
-            {% endif %}
-            {% if params['fnDrawCallback'] is defined %}
-                "fnDrawCallback":     {{ params['fnDrawCallback']|raw }},
-            {% endif %}
-            {% if params['aaSortingFixed'] is defined %}
-                "aaSortingFixed":     {{ params['aaSortingFixed']|raw }},
-            {% endif %}
-            {% if params['fnServerData'] is defined %}
-                "fnServerData": {{ params['fnServerData']|raw }},
-            {% elseif params['customSearchForm'] is defined %}
-                'fnServerData': 'function ( sSource, aoData, fnCallback ) { var searchValues = jQuery("{{ params['customSearchForm'] }}").serializeArray(); for ( var i=0; i < searchValues.length; i++) { aoData.push(searchValues[i]); } jQuery.getJSON( sSource, aoData, function (json) {fnCallback(json)} ); }',
-            {% endif %}
-            {% if params['aaData'] is not null %}
-                "aaData": {{ params['aaData']|raw }},
-                {% if params['aoColumnDefs'] is defined %}
-                    "aoColumns": {{ params['aoColumnDefs']|json_encode|raw }},
-                {% endif %}
-            {% elseif params['aoColumnDefs'] is defined %}
-                "aoColumnDefs": {{ params['aoColumnDefs']|json_encode|raw }},
-            {% endif %}
-            'true': true
-        } );
+        {{ rawParams['id'] }}_dataTable = jQuery('#{{ rawParams['id'] }}').dataTable({{ params|json_encode(constant('JSON_HEX_QUOT'))|convertFunctions|raw }});
         {% endspaceless %}
     } );
 </script>
