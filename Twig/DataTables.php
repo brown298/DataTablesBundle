@@ -153,11 +153,13 @@ class DataTables extends \Twig_Extension
      */
     protected function buildJsParams()
     {
+        $this->params['customParams'] = (!isset($this->params['customParams'])) ? array() : $this->params['customParams'];
         $keys    = array_merge(array(
             'aaData',
             'aaSorting',
             'aaSortingFixed',
             'aoColumnDefs',
+            'aoColumns',
             'bLengthChange',
             'bFilter',
             'bPaginate',
@@ -188,7 +190,7 @@ class DataTables extends \Twig_Extension
 
         // build the final params
         foreach ($keys as $key) {
-            if (isset($this->params[$key])) {
+            if (isset($this->params[$key]) || isset($this->params['customParams'][$key])) {
                 if (preg_match('/^aa.+/', $key) || preg_match('/^ao.+/', $key)) {
                     $results[$key] = json_encode($this->params[$key]);
                 } elseif(isset($this->params['customParams'][$key])) {
