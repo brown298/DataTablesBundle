@@ -189,7 +189,7 @@ class DataTables extends \Twig_Extension
         // build the final params
         foreach ($keys as $key) {
             if (isset($this->params[$key])) {
-                if (preg_match('/^aa.+', $key) || preg_match('/^ao.+', $key)) {
+                if (preg_match('/^aa.+/', $key) || preg_match('/^ao.+/', $key)) {
                     $results[$key] = json_encode($this->params[$key]);
                 } elseif(isset($this->params['customParams'][$key])) {
                     $results[$key] = $this->params['customParams'][$key];
