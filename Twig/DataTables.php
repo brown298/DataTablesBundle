@@ -77,7 +77,8 @@ class DataTables extends \Twig_Extension
         $replaceKeys = array();
 
         foreach($data as $key => &$value) {
-            if (preg_match('/^function.*/', $value)) {
+            if (preg_match('/^function.*/', $value)
+                || $this->isJsonObject($value)) {
                 $valueArray[]  = $value;
                 $value         = "%{$key}%";
                 $replaceKeys[] = "\"{$value}\"";
@@ -88,6 +89,20 @@ class DataTables extends \Twig_Extension
         $resultJson = str_replace($replaceKeys, $valueArray, $resultJson);
 
         return $resultJson;
+    }
+
+    /**
+     * isJsonObject
+     *
+     * @param $string
+     *
+     * @return bool
+     */
+    protected function isJsonObject($string)
+    {
+        $evalObj = json_decode($string);
+        $result  =  is_object($evalObj) || is_array($evalObj);
+        return $result;
     }
 
     /**
