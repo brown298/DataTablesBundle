@@ -137,6 +137,14 @@ class DataTablesTest extends AbstractBaseTest
                 'sourceJson' => json_encode(array(12 => 'function() { print("test"); }', 5 => 'b')),
                 'resultJson' => '{"12":function() { print("test"); },"5":"b"}',
             ),
+            array(
+                'sourceJson' => '{"d":"[\"a\",[\"b\",\"c\"]]"}',
+                'resultJson' => '{"d":["a",["b","c"]]}',
+            ),
+            array(
+                'sourceJson' => '{"a":"function(){return true;}","b":"[\"a\",[\"b\",\"c\"]]","d":"123"}',
+                'resultJson' => '{"a":function(){return true;},"b":["a",["b","c"]],"d":"123"}', 
+            ),
         );
     }
 
@@ -226,5 +234,36 @@ class DataTablesTest extends AbstractBaseTest
         $results = $this->callProtected($this->service, 'buildJsParams');
         $this->assertEquals(array('fnServerData'), array_keys($results));
         $this->assertRegExp('/testForm/', $results['fnServerData'], 'Custom form name not found in fnServerData output');
+    }
+
+    /**
+     * isJsonObjectDataProvider
+     *
+     * @return array
+     */
+    public function isJsonObjectDataProvider()
+    {
+        return array(
+            array('[]', true),
+            array('', false),
+            array('{}', true),
+            array('{"a":"b"}', true),
+            array('{"a":"b","c":{"d":"e"}}', true),
+            array('[["a","b"],"c","d"]', true),
+        );
+    }
+
+    /**
+     * testIsJsonObject
+     *
+     * @dataProvider isJsonObjectDataProvider
+     *
+     * @param $object
+     * @param $expectedResult
+     */
+    public function testIsJsonObject($object, $expectedResult)
+    {
+        $result = $this->callProtected($this->service, 'isJsonObject', array($object));
+        $this->assertEquals($expectedResult, $result, 'Error: isJsonObject returned ' . ($result ? 'True':'False') . ' on ' . $object);
     }
 } 
