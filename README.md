@@ -68,15 +68,24 @@ Currently dataTables can paginate :
 ```php
 use Symfony\Component\HttpFoundation\Request;
 use Brown298\DataTablesBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 
-class DefaultController extends AbstractController
+/**
+ * Class DtControllerStyleController
+ *
+ * @Route("/style/controller/")
+ * @package Brown298\DtTestBundle\Controller
+ */
+class DtControllerStyleController extends AbstractController
 {
     /**
      * @var array
      */
     protected $columns = array(
         'user.id'   => 'Id',
-        'user.name' => 'Name',
+        'user.username' => 'Name',
     );
 
     /**
@@ -89,9 +98,9 @@ class DefaultController extends AbstractController
     public function getQueryBuilder(Request $request)
     {
         $em             = $this->get('doctrine.orm.entity_manager');
-        $userRepository = $em->getRepository('ExampleBundle\Entity\User');
+        $userRepository = $em->getRepository('Brown298\DtTestBundle\Entity\User');
         $qb = $userRepository->createQueryBuilder('user')
-                ->andWhere('user.deleted = false');
+            ->andWhere('user.deleted = false');
 
         return $qb;
     }
@@ -99,7 +108,7 @@ class DefaultController extends AbstractController
     /**
      * dataAction
      *
-     * @route("/ajax", name="show_ajax")
+     * @route("/ajax", name="controller_style_ajax")
      *
      * @param Request $request
      * @param null $dataFormatter
@@ -116,7 +125,7 @@ class DefaultController extends AbstractController
 
             foreach ($data as $row) {
                 $results[$count][] = $row['id'];
-                $results[$count][] = $renderer->render('ExampleBundle:Default:nameFormatter.html.twig', array('name' => $row['name']));
+                $results[$count][] = $renderer->render('Brown298DtTestBundle:DtControllerStyle:nameFormatter.html.twig', array('name' => $row['username']));
                 $count += 1;
             }
 
@@ -127,6 +136,7 @@ class DefaultController extends AbstractController
     /**
      * indexAction
      *
+     * @route("/", name="controller_style")
      * @Template()
      *
      * @return array
@@ -145,16 +155,16 @@ class DefaultController extends AbstractController
 ```jinja
   {# Default\index.html.twig #}
 
+  {% extends '::base.html.twig' %}
+
   {% block body %}
-
-    {{ addDataTable(columns, {
-            'path':          path('show_ajax'),
-            'bLengthChange': 1,
-            'bInfo':         1,
-            'bFilter':       1,
-        }) }}
-
-  {% endblock %}
+      {{ addDataTable(columns, {
+      'path':          path('controller_style_ajax'),
+      'bLengthChange': 1,
+      'bInfo':         1,
+      'bFilter':       1,
+      }) }}
+  {% endblock%}
 ```
 
 ```jinja
@@ -171,31 +181,45 @@ controller very clean.
 
 #### Model
 ```php
-class UserTable extends AbstractDataTable implements DataTableInterface
+use Brown298\DataTablesBundle\Model\DataTable\AbstractQueryBuilderDataTable;
+use Brown298\DataTablesBundle\Model\DataTable\QueryBuilderDataTableInterface;
+use Symfony\Component\HttpFoundation\Request;
+
+/**
+ * Class UserTable
+ *
+ * @package Brown298\DtTestBundle\Model
+ */
+class UserTable extends AbstractQueryBuilderDataTable implements QueryBuilderDataTableInterface
 {
     /**
      * @var array
      */
     protected $columns = array(
         'user.id'   => 'Id',
-        'user.name' => 'Name',
+        'user.username' => 'Name',
     );
 
     /**
-     * getFormatter
+     * @var Doctrine\ORM\EntityManager
+     */
+    protected $em;
+
+    /**
+     * getDataFormatter
      *
      * @return \Closure
      */
-    public function getFormatter()
+    public function getDataFormatter()
     {
-        $renderer = $this->containter->get('templating');
+        $renderer = $this->container->get('templating');
         return function($data) use ($renderer) {
             $count   = 0;
             $results = array();
 
             foreach ($data as $row) {
                 $results[$count][] = $row['id'];
-                $results[$count][] = $renderer->render('ExampleBundle:Default:nameFormatter.html.twig', array('name' => $row['name']));
+                $results[$count][] = $renderer->render('Brown298DtTestBundle:DtModelStyle:nameFormatter.html.twig', array('name' => $row['username']));
                 $count += 1;
             }
 
@@ -212,22 +236,53 @@ class UserTable extends AbstractDataTable implements DataTableInterface
      */
     public function getQueryBuilder(Request $request)
     {
-        $userRepository = $this->em->getRepository('ExampleBundle\Entity\User');
+        $userRepository = $this->em->getRepository('Brown298\DtTestBundle\Entity\User');
         $qb = $userRepository->createQueryBuilder('user')
-                ->andWhere('user.deleted = false');
+            ->andWhere('user.deleted = false');
 
         return $qb;
+    }
+
+    /**
+     * @param \Brown298\DtTestBundle\Model\Doctrine\ORM\EntityManager $em
+     */
+    public function setEm($em)
+    {
+        $this->em = $em;
+    }
+
+    /**
+    /**
+     * @return \Brown298\DtTestBundle\Model\Doctrine\ORM\EntityManager
+     */
+    public function getEm()
+    {
+        return $this->em;
     }
 }
 ```
 
 #### Controller
 ```php
-class DefaultController extends Controller
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Request;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Brown298\DtTestBundle\Model\UserTable;
+
+/**
+ * Class DtModelStyleController
+ *
+ * @Route("/style/model/")
+ *
+ * @package Brown298\DtTestBundle\Controller
+ */
+class DtModelStyleController extends Controller
 {
     /**
      * indexAction
      *
+     * @Route("/", name="model_style")
      * @Template()
      *
      * @return array
@@ -238,7 +293,8 @@ class DefaultController extends Controller
         $em        = $this->get('doctrine.orm.entity_manager');
 
         // process the data table
-        $dataTable = new UserTable($em);
+        $dataTable = new UserTable();
+        $dataTable->setEm($em);
         $dataTable->setContainer($this->container);
         if ($response = $dataTable->ProcessRequest($request)) {
             return $response;
@@ -254,17 +310,18 @@ class DefaultController extends Controller
 
 #### View
 ```jinja
-  {# Default\index.html.twig #}
+{# Default\index.html.twig #}
+{% extends '::base.html.twig' %}
 
-  {% block body %}
+{% block body %}
 
     {{ addDataTable(columns, {
-            'bLengthChange': 1,
-            'bInfo':         1,
-            'bFilter':       1,
-        }) }}
+    'bLengthChange': 1,
+    'bInfo':         1,
+    'bFilter':       1,
+    }) }}
 
-  {% endblock %}
+{% endblock %}
 ```
 
 ```jinja
