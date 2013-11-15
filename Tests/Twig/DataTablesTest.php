@@ -143,7 +143,7 @@ class DataTablesTest extends AbstractBaseTest
             ),
             array(
                 'sourceJson' => '{"a":"function(){return true;}","b":"[\"a\",[\"b\",\"c\"]]","d":"123"}',
-                'resultJson' => '{"a":function(){return true;},"b":["a",["b","c"]],"d":"123"}', 
+                'resultJson' => '{"a":function(){return true;},"b":["a",["b","c"]],"d":"123"}',
             ),
         );
     }

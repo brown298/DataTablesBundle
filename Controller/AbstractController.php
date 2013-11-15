@@ -1,7 +1,7 @@
 <?php
 namespace Brown298\DataTablesBundle\Controller;
 
-use Brown298\DataTablesBundle\Model\EmptyDataTable;
+use Brown298\DataTablesBundle\Test\DataTable\QueryBuilderDataTable;
 use Brown298\DataTablesBundle\Model\ResponseParameterBag;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -23,7 +23,7 @@ abstract class AbstractController extends Controller
     protected $colunns = array();
 
     /**
-     * @var EmptyDataTable
+     * @var QueryBuilderDataTable
      */
     protected $dataTable;
 
@@ -37,7 +37,7 @@ abstract class AbstractController extends Controller
     protected function getData(Request $request)
     {
         if ($this->dataTable == null) {
-            $this->dataTable = new EmptyDataTable();
+            $this->dataTable = new QueryBuilderDataTable();
             $this->dataTable->setContainer($this->container);
         }
 
@@ -51,15 +51,15 @@ abstract class AbstractController extends Controller
      *
      * @return null
      */
-     protected function getQueryBuilder(Request $request)
-     {
-         if ($this->dataTable == null) {
-             $this->dataTable = new EmptyDataTable();
-             $this->dataTable->setContainer($this->container);
-         }
+    protected function getQueryBuilder(Request $request)
+    {
+        if ($this->dataTable == null) {
+            $this->dataTable = new QueryBuilderDataTable();
+            $this->dataTable->setContainer($this->container);
+        }
 
-         return $this->dataTable->getQueryBuilder($request);
-     }
+        return $this->dataTable->getQueryBuilder($request);
+    }
 
     /**
      * dataAction
@@ -72,7 +72,7 @@ abstract class AbstractController extends Controller
      */
     public function dataAction(Request $request, $dataFormatter = null)
     {
-        $this->dataTable = new EmptyDataTable();
+        $this->dataTable = new QueryBuilderDataTable();
         $this->dataTable->setContainer($this->container);
         $this->dataTable->setColumns($this->colunns);
         $this->dataTable->setQueryBuilder($this->getQueryBuilder($request));
