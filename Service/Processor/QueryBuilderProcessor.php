@@ -29,8 +29,11 @@ class QueryBuilderProcessor extends AbstractProcessor implements ProcessorInterf
      * @param RequestParameterBag $requestParameters
      * @param \Psr\Log\LoggerInterface $logger
      */
-    public function __construct(QueryBuilder $queryBuilder, RequestParameterBag $requestParameters, LoggerInterface $logger = null)
-    {
+    public function __construct(
+        QueryBuilder        $queryBuilder,
+        RequestParameterBag $requestParameters,
+        LoggerInterface     $logger = null
+    ) {
         parent::__construct($requestParameters, $logger);
         $this->setQueryBuilder($queryBuilder);
     }
@@ -131,7 +134,6 @@ class QueryBuilderProcessor extends AbstractProcessor implements ProcessorInterf
         $qb = $this->addOrder($qb);
         $qb = $this->addOffset($qb);
         $qb = $this->addLimits($qb);
-
         $this->debug('DataTables Query:' . $qb->getQuery()->getSQL() . ' ' . json_encode($qb->getParameters()));
         return $qb;
     }
