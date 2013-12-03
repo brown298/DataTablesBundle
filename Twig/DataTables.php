@@ -183,6 +183,7 @@ class DataTables extends \Twig_Extension
             'bSort',
             'bInfo',
             'fnDrawCallback',
+            'fnRowCallback',
             'fnServerData',
             'iDisplayLength',
             'sPaginationType',
