@@ -19,7 +19,7 @@ class RequestParameterBag extends AbstractParamterBag
             'name'    => 'Offset',
             'const'   => 'iDisplayStart',
             'default' => 0,
-        ),  // current offset
+        ),
         'length' => array(
             'name'    => 'Display Length',
             'const'   => 'iDisplayLength',
@@ -60,12 +60,22 @@ class RequestParameterBag extends AbstractParamterBag
             'const'   => 'bSearchable_%d',
             'default' => 'false',
         ), // determine if the columns are searchable
+        'regex' => array(
+            'name'    => 'Regex Columns',
+            'const'   => 'bRegex_%d',
+            'default' => false,
+        ), // determine if the search is in a regex format
         'searchCols' => array(
             'name'    => 'Search Columns',
             'const'   => 'sSearch_%d',
             'default' => null,
         ), // individual column search
     );
+
+    /**
+     * @var bool if regular expression search is allowed
+     */
+    protected $allowRegex = false;
 
     /**
      * @var array column data
@@ -100,7 +110,9 @@ class RequestParameterBag extends AbstractParamterBag
     }
 
     /**
-     * @param $echo
+     * setEcho
+     *
+     * @param string $echo
      */
     public function setEcho($echo)
     {
@@ -136,7 +148,7 @@ class RequestParameterBag extends AbstractParamterBag
     /**
      * getSearchString
      *
-     * @return null
+     * @return mixed
      */
     public function getSearchString()
     {
@@ -179,7 +191,22 @@ class RequestParameterBag extends AbstractParamterBag
      */
     public function isSearchable($i)
     {
-        return $this->getVarByName('searchable', $i) == 'true';
+        $searchable = $this->getVarByName('searchable', $i) == 'true';
+        $isRegex    = $this->isRegex($i);
+
+        return ($searchable && (!$isRegex || $this->allowRegex));
+    }
+
+    /**
+     * isRegex
+     *
+     * @param int $i
+     *
+     * @return bool
+     */
+    public function isRegex($i)
+    {
+        return $this->getVarByName('regex', $i) == 'true';
     }
 
     /**
@@ -208,16 +235,7 @@ class RequestParameterBag extends AbstractParamterBag
      */
     public function getColumnSearch($i)
     {
-        $raw =  $this->getVarByName('searchCols', $i);
-        if (substr($raw,0,1) == '^' ) {
-            $raw = trim($raw,'^');
-        }
-
-        if (substr($raw,-1,1) == '$' ) {
-            $raw = trim($raw,'$');
-        }
-
-        return $raw;
+        return $this->getVarByName('searchCols', $i);
     }
 
     /**
@@ -380,5 +398,26 @@ class RequestParameterBag extends AbstractParamterBag
 
         return floor($offset/$length);
     }
+
+    /**
+     * setAllowRegex
+     *
+     * @param boolean $allowRegex
+     */
+    public function setAllowRegex($allowRegex)
+    {
+        $this->allowRegex = $allowRegex;
+    }
+
+    /**
+     * getAllowRegex
+     *
+     * @return boolean
+     */
+    public function getAllowRegex()
+    {
+        return $this->allowRegex;
+    }
+
 
 }
