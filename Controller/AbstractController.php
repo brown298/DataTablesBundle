@@ -20,7 +20,7 @@ abstract class AbstractController extends Controller
     /**
      * @var array
      */
-    protected $colunns = array();
+    protected $columns = array();
 
     /**
      * @var QueryBuilderDataTable
@@ -74,7 +74,7 @@ abstract class AbstractController extends Controller
     {
         $this->dataTable = new QueryBuilderDataTable();
         $this->dataTable->setContainer($this->container);
-        $this->dataTable->setColumns($this->colunns);
+        $this->dataTable->setColumns($this->columns);
         $this->dataTable->setQueryBuilder($this->getQueryBuilder($request));
         return $this->dataTable->getJsonResponse($request, $dataFormatter);
     }

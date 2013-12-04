@@ -63,7 +63,7 @@ abstract class AbstractQueryBuilderDataTable extends AbstractDataTable implement
         }
 
         $service->setQueryBuilder($qb);
-        if ($service->getColumns() == null) {
+        if ($service->getColumns() == null || count($service->getColumns()) != count($this->columns)) {
             $service->setColumns($this->columns);
         }
 

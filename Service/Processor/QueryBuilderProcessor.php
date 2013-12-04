@@ -157,6 +157,7 @@ class QueryBuilderProcessor extends AbstractProcessor implements ProcessorInterf
         $searchColumns = $this->getColumns();
 
         if (!empty($searchColumns)) {
+            $this->debug('SearchColumns:' . implode(', ',$searchColumns));
             foreach ($searchColumns as $name => $title) {
                 if (strlen($search) > 0) {
                     $paramName = str_replace('.','_',$name) . '_search';
@@ -175,6 +176,8 @@ class QueryBuilderProcessor extends AbstractProcessor implements ProcessorInterf
                     $qb->setParameter($name, $value);
                 }
             }
+        } else {
+            $this->debug('No SearchColumns Found');
         }
 
         return $qb;
