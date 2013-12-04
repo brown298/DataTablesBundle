@@ -5,6 +5,7 @@ use Brown298\DataTablesBundle\Exceptions\ProcessorException;
 use Brown298\DataTablesBundle\Service\ServerProcessService;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class AbstractRepositoryDataTable
@@ -42,6 +43,29 @@ class AbstractRepositoryDataTable extends AbstractQueryBuilderDataTable implemen
         $this->serverProcessorService->setRepository($this->repository);
 
         return $this->serverProcessorService->findAll();
+    }
+
+    /**
+     * @param Request $request
+     * @param null $dataFormatter
+     *
+     * @return JsonResponse|mixed|null
+     */
+    public function getData(Request $request, $dataFormatter = null)
+    {
+        $service = $this->container->get('data_tables.service');
+
+        if ($this->repository == null) {
+            return null;
+        }
+
+        if ($service->getRequest() == null) {
+            $service->setRequest($request);
+        }
+
+        $service->setRepository($this->repository);
+
+        return $this->execute($service, $dataFormatter);
     }
 
     /**
