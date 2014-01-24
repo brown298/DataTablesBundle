@@ -133,6 +133,7 @@ class DataTables extends \Twig_Extension
                 'sPaginationType' => 'full_numbers',
                 'bInfo'           => 0,
                 'bPaginate'       => 1,
+                'bHidePaginate'   => 1,
                 'path'            => '#',
                 'iDisplayLength'  => -1,
                 'table_class'     => 'display dataTable table table-striped',
@@ -202,6 +203,10 @@ class DataTables extends \Twig_Extension
         if (isset($this->params['aaData']) && isset($this->params['aoColumnDefs'])) {
             $this->params['aoColumns'] = $this->params['aoColumnDefs'];
             unset($this->params['aoColumnDefs']);
+        }
+
+        if ($this->params['bHidePaginate']) {
+            $this->params['fnDrawCallback'] = 'function() { if (jQuery(".dataTables_paginate a").length <=5) {jQuery(".dataTables_paginate").hide();} else {jQuery(".dataTables_paginate").show();} }';
         }
 
         // build the final params
