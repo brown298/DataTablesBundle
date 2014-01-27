@@ -347,4 +347,34 @@ class RequestParameterBagTest extends AbstractBaseTest
         $this->assertEquals($expectedResult, $results);
     }
 
+    /**
+     * testGetSetAllowRegex
+     */
+    public function testGetSetAllowRegex()
+    {
+        $this->assertFalse($this->model->getAllowRegex());
+        $this->model->setAllowRegex(true);
+        $this->assertTrue($this->model->getAllowRegex());
+    }
+
+    /**
+     * testRegexPreventsSearch
+     *
+     * ensure when regex is not allowed the search does not process
+     */
+    public function testRegexPreventsSearch()
+    {
+        $columns = array(
+            'a.id' => 'ID',
+        );
+        $this->model->setColumns($columns);
+        $this->callProtected($this->model, 'setVarByNameId', array('searchable', 0, 'true'));
+        $this->callProtected($this->model, 'setVarByNameId', array('searchCols', 0, 'test'));
+        $this->callProtected($this->model, 'setVarByNameId', array('regex',0,true));
+
+        $results = $this->model->isSearchable(0);
+
+        $this->assertFalse($results);
+    }
+
 }

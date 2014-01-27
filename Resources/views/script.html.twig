@@ -1,8 +1,9 @@
 <script type="text/javascript">
-    var {{ rawParams['id'] }}_dataTable = {};
-    jQuery(document).ready(function() {
-        {% spaceless %}
-        {{ rawParams['id'] }}_dataTable = jQuery('#{{ rawParams['id'] }}').dataTable({{ params|json_encode(constant('JSON_HEX_QUOT'))|convertFunctions|raw }});
-        {% endspaceless %}
-    } );
+    if (typeof dTables === 'undefined') {
+        var dTables = { "tables": {}, "keys": [] };
+    }
+    jQuery(document).ready(function() { {% spaceless %}
+        dTables.tables.{{ rawParams['id'] }} = jQuery('#{{ rawParams['id'] }}').dataTable({{ params|json_encode(constant('JSON_HEX_QUOT'))|convertFunctions|raw }});
+        dTables.keys.push('{{ rawParams['id'] }}');
+    {% endspaceless %}});
 </script>
