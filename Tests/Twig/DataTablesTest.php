@@ -75,7 +75,8 @@ class DataTablesTest extends AbstractBaseTest
      */
     public function testRenderJs()
     {
-        $this->setProtectedValue($this->service, 'params',array('script_template'=>'template','twigVars'=> array(), 'customParams' => array()));
+        $this->setProtectedValue($this->service, 'params',
+            array('script_template'=>'template','twigVars'=> array(), 'customParams' => array()));
         Phake::when($this->environment)->render(Phake::anyParameters())->thenReturn('test');
         $this->service->initRuntime($this->environment);
 
