@@ -4,7 +4,6 @@ namespace Brown298\DataTablesBundle\Test\DataTable;
 use Brown298\DataTablesBundle\Model\DataTable\AbstractDataTable as AbstractBaseDataTable;
 use Brown298\DataTablesBundle\Model\DataTable\DataTableInterface as BaseDataTableInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Class EmptyDataTable

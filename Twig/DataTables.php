@@ -1,8 +1,6 @@
 <?php
 namespace Brown298\DataTablesBundle\Twig;
 
-use Symfony\Bridge\Twig\TwigEngine;
-
 /**
  * Class DataTables
  *
