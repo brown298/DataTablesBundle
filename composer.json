@@ -20,7 +20,7 @@
     "require": {
         "php":                          ">=5.3.3",
         "doctrine/orm":                 "~2.2,>=2.2.3",
-        "datatables/datatables":        "dev-master",
+        "datatables/datatables":        "dev-master#36f2c2a7d6042ae003171deaacec9e6dc8c7fe1b",
         "symfony/symfony":              ">=2.2.0",
         "twig/twig":                    "1.14.*@dev"
     },
