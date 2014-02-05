@@ -2,7 +2,6 @@
 namespace Brown298\DataTablesBundle\Model;
 
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Query;
 use \Brown298\DataTablesBundle\Model\DataTable\AbstractQueryBuilderDataTable as BaseAbstractDataTable;
 use \Brown298\DataTablesBundle\Model\DataTable\QueryBuilderDataTableInterface as BaseDataTableInterface;
 

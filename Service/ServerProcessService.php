@@ -2,7 +2,6 @@
 namespace Brown298\DataTablesBundle\Service;
 
 use Brown298\DataTablesBundle\Exceptions\ProcessorException;
-use Brown298\DataTablesBundle\Model\RequestParameterBag;
 use Brown298\DataTablesBundle\Model\ResponseParameterBag;
 use Brown298\DataTablesBundle\Service\AbstractServerProcessor;
 use Brown298\DataTablesBundle\Service\Processor\ArrayProcessor;
@@ -10,8 +9,6 @@ use Brown298\DataTablesBundle\Service\Processor\ProcessorInterface;
 use Brown298\DataTablesBundle\Service\Processor\QueryBuilderProcessor;
 use Brown298\DataTablesBundle\Service\Processor\RepositoryProcessor;
 use Doctrine\ORM\EntityRepository;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\QueryBuilder;
 
 /**

@@ -4,13 +4,12 @@ namespace Brown298\DataTablesBundle\Test\DataTable;
 use Brown298\DataTablesBundle\Model\DataTable\AbstractDataTable as AbstractBaseDataTable;
 use Brown298\DataTablesBundle\Model\DataTable\DataTableInterface as BaseDataTableInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Class EmptyDataTable
  *
  * @package Brown298\DataTablesBundle\Model
- * @authro  John Brown <brown.john@gmail.com>
+ * @author  John Brown <brown.john@gmail.com>
  */
 class EmptyDataTable extends AbstractBaseDataTable implements BaseDataTableInterface
 {

@@ -2,11 +2,7 @@
 namespace Brown298\DataTablesBundle\Controller;
 
 use Brown298\DataTablesBundle\Test\DataTable\QueryBuilderDataTable;
-use Brown298\DataTablesBundle\Model\ResponseParameterBag;
-use Doctrine\ORM\QueryBuilder;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 

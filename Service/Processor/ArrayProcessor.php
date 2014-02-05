@@ -1,9 +1,7 @@
 <?php
 namespace Brown298\DataTablesBundle\Service\Processor;
 
-use Brown298\DataTablesBundle\Model\RequestParameterBag;
 use Brown298\DataTablesBundle\Model\ResponseParameterBag;
-use Psr\Log\LoggerInterface;
 
 /**
  * Class ArrayProcessor

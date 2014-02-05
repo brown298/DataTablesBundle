@@ -1,8 +1,6 @@
 <?php
 namespace Brown298\DataTablesBundle\Twig;
 
-use Symfony\Bridge\Twig\TwigEngine;
-
 /**
  * Class DataTables
  *
@@ -205,7 +203,7 @@ class DataTables extends \Twig_Extension
             unset($this->params['aoColumnDefs']);
         }
 
-        if ($this->params['bHidePaginate']) {
+        if (isset($this->params['bHidePaginate']) && $this->params['bHidePaginate']) {
             $this->params['fnDrawCallback'] = 'function() { if (jQuery(".dataTables_paginate a").length <=5) {jQuery(".dataTables_paginate").hide();} else {jQuery(".dataTables_paginate").show();} }';
         }
 

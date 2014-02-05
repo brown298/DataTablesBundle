@@ -2,11 +2,9 @@
 namespace Brown298\DataTablesBundle\Service;
 
 use Brown298\DataTablesBundle\Model\RequestParameterBag;
-use Brown298\DataTablesBundle\Model\ResponseParameterBag;
 use Brown298\DataTablesBundle\Service\Processor\ProcessorInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Doctrine\ORM\QueryBuilder;
 
 
 /**
