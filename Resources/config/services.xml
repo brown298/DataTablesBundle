@@ -7,6 +7,8 @@
     <parameters>
         <!-- Services-->
         <parameter key="data_tables.service.class">Brown298\DataTablesBundle\Service\ServerProcessService</parameter>
+        <parameter key="data_tables.reader.class">Doctrine\Common\Annotations\AnnotationReader</parameter>
+        <parameter key="data_tables.manager.class">Brown298\DataTablesBundle\Service\TableManager</parameter>
 
         <!-- twig extensions -->
         <parameter key="data_tables.twig.extension.class">Brown298\DataTablesBundle\Twig\DataTables</parameter>
@@ -14,7 +16,12 @@
     </parameters>
     <services>
         <!-- Services-->
+        <service id="data_tables.annotation_reader" class="%data_tables.reader.class%" />
         <service id="data_tables.service" class="%data_tables.service.class%" />
+        <service id="data_tables.manager" class="%data_tables.manager.class%" >
+            <argument type="service" id="service_container" />
+            <argument type="service" id="data_tables.annotation_reader" />
+        </service>
 
         <!-- twig extensions -->
         <service id="data_tables.twig.extension" class="%data_tables.twig.extension.class%">
