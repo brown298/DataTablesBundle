@@ -46,4 +46,14 @@ class Column
      * @var mixed width valud for the column
      */
     public $width;
+
+    /**
+     * @var boolean
+     */
+    public $defaultSort = false;
+
+    /**
+     * @var
+     */
+    public $format = null;
 }

@@ -5,6 +5,7 @@ use Brown298\DataTablesBundle\Annotations\Table;
 use Brown298\DataTablesBundle\Model\DataTable\QueryBuilderDataTableInterface;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Process\Exception\InvalidArgumentException;
 
 /**
  * Class TableBuilder
@@ -34,6 +35,10 @@ class TableBuilder
     protected $table;
 
     /**
+     * @var array
+     */
+    protected $columns = array();
+    /**
      * @param ContainerInterface $container
      * @param AnnotationReader $reader
      * @param Table $table
@@ -45,14 +50,55 @@ class TableBuilder
         $this->tableAnnotations  = $table;
     }
 
-    protected function buildMeta()
+    /**
+     * buildMetaData
+     */
+    protected function buildMetaData()
     {
-        /** @todo add metadata to object */
-    }
+        $columnArray = array();
+        $className   = $this->tableAnnotations->class;
+        $refl        = new \ReflectionClass($className);
+        $properties  = $refl->getProperties();
 
-    protected function buildColumns()
-    {
-        /** @todo add crate table column definition */
+        foreach ($properties as $property) {
+            $column = $this->reader->getPropertyAnnotation($property, 'Brown298\DataTablesBundle\Annotations\Column');
+
+            if (!empty($column)) {
+                if (!isset($column->source)) {
+                    throw new InvalidArgumentException('DataTables requires a "source" attribute be provided for a column');
+                }
+
+                if (!isset($column->name)) {
+                    throw new InvalidArgumentException('DataTables requires a "name" attribute be provided for a column');
+                }
+
+                // check for default
+                $default = $this->reader->getPropertyAnnotation($property, 'Brown298\DataTablesBundle\Annotations\Column');
+                if (!empty($default)) {
+                    $column->defaultSort = true;
+                }
+
+                // check for formatting
+                $format = $this->reader->getPropertyAnnotation($property, 'Brown298\DataTablesBundle\Annotations\Format');
+                if (!empty($format)) {
+                    if (!isset($format->dataFields)) {
+                        throw new InvalidArgumentException('DataTables requires a "dataFields" attribute be provided for a column formatter');
+                    }
+                    $column->format = $format;
+                }
+
+                $this->columns[] = $column;
+                $columnArray[$column->source] = $column->name;
+            }
+        }
+
+        $this->table->setColumns($columnArray);
+        $this->table->setMetaData(
+            array(
+                'table'   => $this->tableAnnotations,
+                'columns' => $this->columns,
+            )
+        );
     }
 
     /**
@@ -84,8 +130,7 @@ class TableBuilder
     {
         $this->args = $args;
         $this->buildTable();
-        $this->buildMeta();
-        $this->buildColumns();
+        $this->buildMetaData();
 
         return $this->table;
     }

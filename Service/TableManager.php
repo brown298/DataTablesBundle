@@ -216,7 +216,7 @@ class TableManager
                 foreach ($annotations as $annotation) {
                     if ($annotation instanceof Table) {
                         if ($annotation->id == null) {
-                            throw new InvalidArgumentException('DataTables requiers an "id" atribute be provided');
+                            throw new InvalidArgumentException('DataTables requires an "id" attribute be provided');
                         }
                         $annotation->class = $refl->getName();
                         $tables[$annotation->id] = $annotation;

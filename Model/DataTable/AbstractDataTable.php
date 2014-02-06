@@ -1,6 +1,7 @@
 <?php
 namespace Brown298\DataTablesBundle\Model\DataTable;
 
+use Doctrine\Common\Inflector\Inflector;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -28,6 +29,11 @@ abstract class AbstractDataTable implements DataTableInterface, ContainerAwareIn
      * @var null
      */
     protected $container = null;
+
+    /**
+     * @var null
+     */
+    protected $metaData = null;
 
     /**
      * __construct
@@ -87,10 +93,71 @@ abstract class AbstractDataTable implements DataTableInterface, ContainerAwareIn
     }
 
     /**
+     * @param $row
+     * @return array
+     */
+    public function getColumnRendering($row)
+    {
+        $result = array();
+        foreach($this->metaData['columns'] as $column) {
+            if (isset($column->format)) {
+                $args = array();
+                foreach($column->format->dataFields as $name => $source) {
+                    $args[$name] = $this->getDataValue($row, $source);
+                }
+                if ($column->format->template != null) {
+                    $renderer = $this->container->get('templating');
+                    $result[] = $renderer->render($column->format->template, $args);
+                } else { // no rendere so send back the raw data
+                    $result[] = $args;
+                }
+            } else {
+                $result[] = $this->getDataValue($row, $column->source);
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * @param $row
+     * @param $source
+     * @return null
+     */
+    protected function getDataValue($row, $source)
+    {
+        $result = null;
+        if (is_object($row)) {
+            /** @todo handle walking dependencies */
+            $tokens = explode('.', $source);
+            $name = 'get' . Inflector::classify(array_pop($tokens));
+            $result = $row->$name();
+        } else if(is_array($row)) {
+            $tokens = explode('.', $source);
+            $result = $row[array_pop($tokens)];
+        }
+        return $result;
+    }
+
+    /**
      * @return null
      */
     public function getDataFormatter()
     {
+        if ($this->dataFormatter == null && !empty($this->metaData)) {
+            $table = $this;
+            $this->dataFormatter = function($data) use ($table) {
+                $count   = 0;
+                $results = array();
+
+                foreach ($data as $row) {
+                    $results[$count] = $table->getColumnRendering($row);
+                    $count +=1;
+                }
+
+                return $results;
+            };
+        }
+
         return $this->dataFormatter;
     }
 
@@ -143,5 +210,23 @@ abstract class AbstractDataTable implements DataTableInterface, ContainerAwareIn
 
         return $this->getJsonResponse($request, $dataFormatter);
     }
+
+    /**
+     * @param array $metaData
+     * @return mixed|void
+     */
+    public function setMetaData(array $metaData = null)
+    {
+        $this->metaData = $metaData;
+    }
+
+    /**
+     * @return null
+     */
+    public function getMetaData()
+    {
+        return $this->metaData;
+    }
+
 
 }

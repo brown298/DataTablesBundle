@@ -46,6 +46,17 @@ interface DataTableInterface
     public function getDataFormatter();
 
     /**
+     * @param array $metaData
+     * @return mixed
+     */
+    public function setMetaData(array $metaData = null);
+
+    /**
+     * @return mixed
+     */
+    public function getMetaData();
+
+    /**
      * getData
      *
      * @param Request $request
