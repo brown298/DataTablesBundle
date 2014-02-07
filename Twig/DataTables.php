@@ -19,6 +19,7 @@ class DataTables extends \Twig_Extension
         'script_template' => 'Brown298DataTablesBundle::script.html.twig',
         'id'              => 'dataTable',
         'bProcessing'     => 1,
+        'bHidePaginate'   => 1,
         'bServerSide'     => 1,
         'bLengthChange'   => 0,
         'bFilter'         => 0,
