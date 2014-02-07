@@ -35,7 +35,7 @@ class TableManager
     /**
      * @var array
      */
-    public $pathSearch = array('DataTables', 'Model');
+    public $pathSearch = array('DataTables', 'Model', 'Entity');
 
     /**
      * @var array tables found

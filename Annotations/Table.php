@@ -43,6 +43,31 @@ class Table
     public $searchable = true;
 
     /**
+     * @var bool
+     */
+    public $serverSideProcessing = false;
+
+    /***
+     * @var bool
+     */
+    public $processing = true;
+
+    /**
+     * @var bool
+     */
+    public $info = true;
+
+    /**
+     * @var string
+     */
+    public $paginationType = 'full_numbers';
+
+    /**
+     * @var bool
+     */
+    public $changeLength = true;
+
+    /**
      * @var string
      */
     public $class = '';

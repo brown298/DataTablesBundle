@@ -73,7 +73,7 @@ class TableBuilder
                 }
 
                 // check for default
-                $default = $this->reader->getPropertyAnnotation($property, 'Brown298\DataTablesBundle\Annotations\Column');
+                $default = $this->reader->getPropertyAnnotation($property, 'Brown298\DataTablesBundle\Annotations\DefaultSort');
                 if (!empty($default)) {
                     $column->defaultSort = true;
                 }
