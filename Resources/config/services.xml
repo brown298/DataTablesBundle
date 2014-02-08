@@ -13,6 +13,13 @@
         <!-- twig extensions -->
         <parameter key="data_tables.twig.extension.class">Brown298\DataTablesBundle\Twig\DataTables</parameter>
 
+
+        <parameter key="data_tables.annotation_search_path" type="collection">
+            <parameter>DataTables</parameter>
+            <parameter>Model</parameter>
+            <parameter>Entity</parameter>
+        </parameter>
+
     </parameters>
     <services>
         <!-- Services-->
@@ -21,6 +28,7 @@
         <service id="data_tables.manager" class="%data_tables.manager.class%" >
             <argument type="service" id="service_container" />
             <argument type="service" id="data_tables.annotation_reader" />
+            <argument>%data_tables.annotation_search_path%</argument>
         </service>
 
         <!-- twig extensions -->

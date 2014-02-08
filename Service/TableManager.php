@@ -32,10 +32,9 @@ class TableManager
     private $kernel;
 
     /**
-     * @todo move definition to dependency injection
      * @var array
      */
-    public $annotationPathSearch = array('DataTables', 'Model', 'Entity');
+    public $annotationPathSearch = array();
 
     /**
      * @var array tables found
@@ -50,9 +49,11 @@ class TableManager
     /**
      * @param ContainerInterface $container
      * @param AnnotationReader $reader
+     * @param array $annotationPathSearch
      */
-    public function __construct(ContainerInterface $container, AnnotationReader $reader)
+    public function __construct(ContainerInterface $container, AnnotationReader $reader, array $annotationPathSearch)
     {
+        $this->annotationPathSearch = $annotationPathSearch;
         $this->reader    = $reader;
         $this->container = $container;
         $this->kernel    = $container->get('kernel');
