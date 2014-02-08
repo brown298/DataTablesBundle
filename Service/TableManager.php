@@ -1,9 +1,8 @@
 <?php
 namespace Brown298\DataTablesBundle\Service;
 
-use Brown298\DataTablesBundle\Annotations\Table;
+use Brown298\DataTablesBundle\MetaData\Table;
 use Doctrine\Common\Annotations\AnnotationReader;
-use Metadata\ClassMetadata;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Exception\InvalidArgumentException;
@@ -33,9 +32,10 @@ class TableManager
     private $kernel;
 
     /**
+     * @todo move definition to dependency injection
      * @var array
      */
-    public $pathSearch = array('DataTables', 'Model', 'Entity');
+    public $annotationPathSearch = array('DataTables', 'Model', 'Entity');
 
     /**
      * @var array tables found
@@ -86,28 +86,6 @@ class TableManager
     }
 
     /**
-     * getPossibleDirectories
-     *
-     * gets an array of the possible data table directories
-     *
-     * @return array
-     */
-    protected function getPossibleDirectories()
-    {
-        $directories = array();
-        $bundleDirs  = $this->getBundleDirectories();
-
-        foreach($bundleDirs as $bundle=>$directory) {
-            foreach ($this->pathSearch as $dir) {
-                $path = $directory . DIRECTORY_SEPARATOR . $dir;
-                if (is_dir($path)) { $directories[$bundle][$dir] = $path; }
-            }
-        }
-
-        return $directories;
-    }
-
-    /**
      * hasTable
      *
      * determines if a table exists
@@ -145,7 +123,22 @@ class TableManager
             if ($this->hasBuiltTable($id)) {
                 return $this->builtTables[$id];
             }
-            $tableBuilder = new TableBuilder($this->container, $this->reader, $this->tables[$id]);
+            $table = $this->tables[$id];
+
+            switch ($table['type']) {
+                case 'annotation':
+                    $tableBuilder = new AnnotationTableBuilder($this->container, $this->reader, $table['file']);
+                    break;
+                case 'yml':
+                /** @todo add builder for yml */
+
+                case 'xml':
+                /** @todo add builder for xml */
+
+                default:
+                    Throw new InvalidArgumentException('DataTable ' . $id . ' does not have a type specified');
+                    break;
+            }
 
             $this->builtTables[$id] = $tableBuilder->build(func_get_args());
 
@@ -175,19 +168,57 @@ class TableManager
             return $this->tables;
         }
 
-        $directories = $this->getPossibleDirectories();
+        $this->buildAnnotations();
+
+        /** @todo load yml based tables */
+
+        /** @todo load xml based tables */
+
+        return $this->tables;
+    }
+
+    /**
+     * buildAnnotations
+     */
+    protected function buildAnnotations()
+    {
+        $directories = $this->getPossibleAnnotationDirectories();
         foreach ($directories as $bundle => $directory) {
             foreach ($directory as $dir => $path) {
+
+                // load annotations
                 $finder  = new Finder();
                 $finder->files()->in($path)->name('*.php');
-                $files = $this->getTablesInDir($bundle, $dir, $finder);
+                $files = $this->getAnnotationTablesInDir($bundle, $dir, $finder);
                 if (!empty($files)) {
                     $this->tables = array_merge($this->tables, $files);
                 }
             }
         }
+    }
 
-        return $this->tables;
+
+
+    /**
+     * getPossibleDirectories
+     *
+     * gets an array of the possible data table directories
+     *
+     * @return array
+     */
+    protected function getPossibleAnnotationDirectories()
+    {
+        $directories = array();
+        $bundleDirs  = $this->getBundleDirectories();
+
+        foreach($bundleDirs as $bundle=>$directory) {
+            foreach ($this->annotationPathSearch as $dir) {
+                $path = $directory . DIRECTORY_SEPARATOR . $dir;
+                if (is_dir($path)) { $directories[$bundle][$dir] = $path; }
+            }
+        }
+
+        return $directories;
     }
 
     /**
@@ -199,7 +230,7 @@ class TableManager
      * @return array
      * @throws \Symfony\Component\Process\Exception\InvalidArgumentException
      */
-    protected function getTablesInDir($bundle, $dir, Finder $finder)
+    protected function getAnnotationTablesInDir($bundle, $dir, Finder $finder)
     {
         $tables = array();
         foreach($finder as $file) {
@@ -219,7 +250,7 @@ class TableManager
                             throw new InvalidArgumentException('DataTables requires an "id" attribute be provided');
                         }
                         $annotation->class = $refl->getName();
-                        $tables[$annotation->id] = $annotation;
+                        $tables[$annotation->id] = array('type' => 'annotation', 'file' => $annotation);
                     }
                 }
             }

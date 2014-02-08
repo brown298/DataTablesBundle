@@ -1,8 +1,7 @@
 <?php
 namespace Brown298\DataTablesBundle\Service;
 
-use Brown298\DataTablesBundle\Annotations\Table;
-use Brown298\DataTablesBundle\Model\DataTable\QueryBuilderDataTableInterface;
+use Brown298\DataTablesBundle\MetaData\Table;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Process\Exception\InvalidArgumentException;
@@ -12,7 +11,7 @@ use Symfony\Component\Process\Exception\InvalidArgumentException;
  * @package Brown298\DataTablesBundle\Service
  * @author  John Brown <brown.john@gmail.com>
  */
-class TableBuilder
+class AnnotationTableBuilder implements TableBuilderInterface
 {
     /**
      * @var \Doctrine\Common\Annotations\AnnotationReader
@@ -38,6 +37,7 @@ class TableBuilder
      * @var array
      */
     protected $columns = array();
+
     /**
      * @param ContainerInterface $container
      * @param AnnotationReader $reader
@@ -61,7 +61,7 @@ class TableBuilder
         $properties  = $refl->getProperties();
 
         foreach ($properties as $property) {
-            $column = $this->reader->getPropertyAnnotation($property, 'Brown298\DataTablesBundle\Annotations\Column');
+            $column = $this->reader->getPropertyAnnotation($property, 'Brown298\DataTablesBundle\MetaData\Column');
 
             if (!empty($column)) {
                 if (!isset($column->source)) {
@@ -73,13 +73,13 @@ class TableBuilder
                 }
 
                 // check for default
-                $default = $this->reader->getPropertyAnnotation($property, 'Brown298\DataTablesBundle\Annotations\DefaultSort');
+                $default = $this->reader->getPropertyAnnotation($property, 'Brown298\DataTablesBundle\MetaData\DefaultSort');
                 if (!empty($default)) {
                     $column->defaultSort = true;
                 }
 
                 // check for formatting
-                $format = $this->reader->getPropertyAnnotation($property, 'Brown298\DataTablesBundle\Annotations\Format');
+                $format = $this->reader->getPropertyAnnotation($property, 'Brown298\DataTablesBundle\MetaData\Format');
                 if (!empty($format)) {
                     if (!isset($format->dataFields)) {
                         throw new InvalidArgumentException('DataTables requires a "dataFields" attribute be provided for a column formatter');

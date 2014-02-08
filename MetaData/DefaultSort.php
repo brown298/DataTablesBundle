@@ -1,10 +1,10 @@
 <?php
-namespace Brown298\DataTablesBundle\Annotations;
+namespace Brown298\DataTablesBundle\MetaData;
 
 /**
  * Class DefaultSort
  *
- * @package Brown298\DataTablesBundle\Annotations
+ * @package Brown298\DataTablesBundle\MetaData
  * @author  John Brown <brown.john@gmail.com>
  *
  * @Annotation

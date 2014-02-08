@@ -109,7 +109,7 @@ abstract class AbstractDataTable implements DataTableInterface, ContainerAwareIn
                 if ($column->format->template != null) {
                     $renderer = $this->container->get('templating');
                     $result[] = $renderer->render($column->format->template, $args);
-                } else { // no rendere so send back the raw data
+                } else { // no render so send back the raw data
                     $result[] = $args;
                 }
             } else {
@@ -128,14 +128,46 @@ abstract class AbstractDataTable implements DataTableInterface, ContainerAwareIn
     {
         $result = null;
         if (is_object($row)) {
-            /** @todo handle walking dependencies */
-            $tokens = explode('.', $source);
-            $name = 'get' . Inflector::classify(array_pop($tokens));
-            $result = $row->$name();
+            $result = $this->getObjectValue($row, $source);
         } else if(is_array($row)) {
             $tokens = explode('.', $source);
             $result = $row[array_pop($tokens)];
         }
+
+        return $result;
+    }
+
+    /**
+     * getObject Value
+     *
+     * allows for relations based on things like faq.createdBy.id
+     *
+     * @param $row
+     * @param $source
+     * @return string
+     */
+    protected function getObjectValue($row, $source)
+    {
+        $result = 'Unknown';
+
+        $tokens = explode('.', $source);
+        $name = 'get' . Inflector::classify(array_pop($tokens));
+        if (count($tokens) <= 1 && method_exists($row, $name)) {
+            $result = $row->$name();
+        } else {
+            if (count($tokens) > 1) {
+                $sub = $this->getObjectValue($row, implode('.', $tokens));
+                if (is_object($sub) && method_exists($sub,$name)) {
+                    $result = $sub->$name();
+                } elseif (is_array($sub)) {
+                    $result = array();
+                    foreach($sub as $d) {
+                        $result[] = $this->getObjectValue($d, implode('.', $tokens));
+                    }
+                }
+            }
+        }
+
         return $result;
     }
 

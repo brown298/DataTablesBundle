@@ -1,10 +1,10 @@
 <?php
-namespace Brown298\DataTablesBundle\Annotations;
+namespace Brown298\DataTablesBundle\MetaData;
 
 /**
  * Class Table
  *
- * @package Brown298\DataTablesBundle\Annotations
+ * @package Brown298\DataTablesBundle\MetaData
  * @author  John Brown <brown.john@gmail.com>
  *
  * @Annotation
@@ -43,27 +43,27 @@ class Table
     public $searchable = true;
 
     /**
-     * @var bool
+     * @var bool use server side processing?
      */
     public $serverSideProcessing = false;
 
     /***
-     * @var bool
+     * @var bool show the processing text
      */
     public $processing = true;
 
     /**
-     * @var bool
+     * @var bool display data tables info text
      */
     public $info = true;
 
     /**
-     * @var string
+     * @var string paginator type
      */
     public $paginationType = 'full_numbers';
 
     /**
-     * @var bool
+     * @var bool allow changing of display length
      */
     public $changeLength = true;
 

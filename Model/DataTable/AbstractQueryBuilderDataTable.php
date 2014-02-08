@@ -18,6 +18,11 @@ abstract class AbstractQueryBuilderDataTable extends AbstractDataTable implement
     protected $queryBuilder = null;
 
     /**
+     * @var bool
+     */
+    public $hydrateObjects = false;
+
+    /**
      * getData
      *
      * override this function to return a raw data array
@@ -35,6 +40,21 @@ abstract class AbstractQueryBuilderDataTable extends AbstractDataTable implement
         }
 
         return $this->getDataByQueryBuilder($request, $this->queryBuilder, $dataFormatter);
+    }
+
+    /**
+     * getObject Value
+     *
+     * allows for relations based on things like faq.createdBy.id
+     *
+     * @param $row
+     * @param $source
+     * @return string
+     */
+    protected function getObjectValue($row, $source)
+    {
+        /** @todo use querybuilder to determine values */
+        return parent::getObjectValue($row, $source);
     }
 
     /**
@@ -79,7 +99,7 @@ abstract class AbstractQueryBuilderDataTable extends AbstractDataTable implement
      */
     public function execute($service, $formatter)
     {
-        return $service->process($formatter, false);
+        return $service->process($formatter, $this->hydrateObjects);
     }
 
     /**
@@ -101,7 +121,7 @@ abstract class AbstractQueryBuilderDataTable extends AbstractDataTable implement
      *
      * @return QueryBuilder|null
      */
-    public function getQueryBuilder(Request $request)
+    public function getQueryBuilder(Request $request = null)
     {
         return $this->queryBuilder;
     }

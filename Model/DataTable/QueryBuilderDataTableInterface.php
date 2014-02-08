@@ -38,5 +38,5 @@ interface QueryBuilderDataTableInterface extends DataTableInterface
      *
      * @return mixed
      */
-    public function getQueryBuilder(Request $request);
+    public function getQueryBuilder(Request $request = null);
 } 

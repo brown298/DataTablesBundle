@@ -1,11 +1,11 @@
 <?php
 
-namespace Brown298\DataTablesBundle\Annotations;
+namespace Brown298\DataTablesBundle\MetaData;
 
 /**
  * Class Format
  *
- * @package Brown298\DataTablesBundle\Annotations
+ * @package Brown298\DataTablesBundle\MetaData
  * @author  John Brown
  *
  * @Annotation
