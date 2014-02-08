@@ -43,7 +43,7 @@ class Column
     public $class;
 
     /**
-     * @var mixed width valud for the column
+     * @var mixed width value for the column
      */
     public $width;
 
