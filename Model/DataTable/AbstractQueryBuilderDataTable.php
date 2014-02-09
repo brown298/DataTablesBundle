@@ -144,7 +144,10 @@ abstract class AbstractQueryBuilderDataTable extends AbstractDataTable implement
 
             if ($this->metaData['table']->queryBuilder != null) {
                 $function = $this->metaData['table']->queryBuilder;
-                return $repo->$function();
+
+                if(method_exists($repo, $function)) {
+                    return $repo->$function();
+                }
             } else {
                 $tokens = explode('\\', $this->metaData['table']->entity);
                 $alias  = array_pop($tokens);

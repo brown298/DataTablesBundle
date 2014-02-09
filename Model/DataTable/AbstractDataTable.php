@@ -130,8 +130,13 @@ abstract class AbstractDataTable implements DataTableInterface, ContainerAwareIn
         if (is_object($row)) {
             $result = $this->getObjectValue($row, $source);
         } else if(is_array($row)) {
-            $tokens = explode('.', $source);
-            $result = $row[array_pop($tokens)];
+            $tokens  = explode('.', $source);
+            $current = array_pop($tokens);
+            if (isset($row[$current])) {
+                $result = $row[$current];
+            } else {
+                $result = 'Unknown Value at ' . $current;
+            }
         }
 
         return $result;

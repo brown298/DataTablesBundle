@@ -119,15 +119,6 @@ class QueryBuilderDataTableTest extends AbstractBaseTest
     }
 
     /**
-     * testGetDataWithoutQueryBuilderReturnNull
-     *
-     */
-    public function testGetDataWithoutQueryBuilderReturnNull()
-    {
-        $this->assertNull($this->dataTable->getData($this->request));
-    }
-
-    /**
      * testGetDataByQueryBuilderExecutes
      *
      */
