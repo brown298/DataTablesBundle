@@ -60,6 +60,7 @@ class RepositoryDataTableTest extends AbstractBaseTest
      */
     protected $repository;
 
+
     /**
      * setUp
      *
@@ -213,4 +214,6 @@ class RepositoryDataTableTest extends AbstractBaseTest
         Phake::verify($this->service)->setRepository($this->repository);
         Phake::verify($this->service)->aaaah(Phake::anyParameters());
     }
+
+
 } 

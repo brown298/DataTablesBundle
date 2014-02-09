@@ -44,15 +44,33 @@ class QueryBuilderDataTableTest extends AbstractBaseTest
 
     /**
      * @Mock
-     * @var Brown298\DataTablesBundle\Service\ServerProcessService
+     * @var \Brown298\DataTablesBundle\Service\ServerProcessService
      */
     protected $service;
 
     /**
      * @Mock
-     * @var Doctrine\ORM\QueryBuilder
+     * @var \Doctrine\ORM\QueryBuilder
      */
     protected $queryBuilder;
+
+    /**
+     * @Mock
+     * @var \Brown298\DataTablesBundle\MetaData\Column
+     */
+    protected $column;
+
+    /**
+     * @Mock
+     * @var \Brown298\DataTablesBundle\MetaData\Format
+     */
+    protected $format;
+
+    /**
+     * @Mock
+     * @var \Symfony\Component\Templating\EngineInterface
+     */
+    protected $renderer;
 
     /**
      * setUp
@@ -177,5 +195,90 @@ class QueryBuilderDataTableTest extends AbstractBaseTest
         $this->callProtected($this->dataTable,'getDataByQueryBuilder', array($this->request, $this->queryBuilder));
 
         Phake::verify($this->service)->setLogger($this->logger);
+    }
+
+
+    /**
+     * testColumnRenderingNoFormatting
+     */
+    public function testColumnRenderingNoFormatting()
+    {
+        $metaData             = array('columns'=> array($this->column));
+        $row                  = array('test' => 'result');
+        $this->column->source = 'data.test';
+
+        $this->dataTable->setMetaData($metaData);
+        $result = $this->dataTable->getColumnRendering($row);
+
+        $this->assertEquals(array('result'), $result);
+    }
+
+    /**
+     * testColumnRenderingFormatNoTemplate
+     */
+    public function testColumnRenderingFormatNoTemplate()
+    {
+        $metaData                 = array('columns'=> array($this->column));
+        $row                      = array('test' => 'result', 'value2' => 'result2');
+        $this->column->format     = $this->format;
+        $this->format->dataFields = array('result1' => 'data.test', 'result2' =>'data.value2');
+
+        $this->dataTable->setMetaData($metaData);
+        $result = $this->dataTable->getColumnRendering($row);
+
+        $this->assertEquals(array(
+            array('result1' => 'result', 'result2' => 'result2'),
+        ), $result);
+    }
+
+    public function testColumnRenderingFormatTemplate()
+    {
+        $metaData                 = array('columns'=> array($this->column));
+        $row                      = array('test' => 'result', 'value2' => 'result2');
+        $this->column->format     = $this->format;
+        $this->format->dataFields = array('result1' => 'data.test', 'result2' =>'data.value2');
+        $this->format->template   = 'template';
+
+        Phake::when($this->container)->get('templating')->thenReturn($this->renderer);
+        Phake::when($this->renderer)->render('template', $this->anything())->thenReturn('renderResult');
+
+        $this->dataTable->setMetaData($metaData);
+        $result = $this->dataTable->getColumnRendering($row);
+
+        $this->assertEquals(array('renderResult'), $result);
+        Phake::verify($this->renderer)->render($this->anything(), array('result1' => 'result', 'result2' => 'result2'));
+    }
+
+    /**
+     * testGetSetMetaData
+     */
+    public function testGetSetMetaData()
+    {
+        $expectedData = array('test');
+        $this->assertNull($this->dataTable->getMetaData());
+        $this->dataTable->setMetaData($expectedData);
+        $this->assertEquals($expectedData, $this->dataTable->getMetaData());
+        $this->dataTable->setMetaData(null);
+        $this->assertNull($this->dataTable->getMetaData());
+    }
+
+    /**
+     * testGetDataValueArray
+     */
+    public function testGetDataValueArray()
+    {
+        $row = array('test' => 'result');
+        $result = $this->callProtected($this->dataTable,'getDataValue', array($row, 'data.test'));
+        $this->assertEquals('result', $result);
+    }
+
+    /**
+     * testGetDataOther
+     */
+    public function testGetDataOther()
+    {
+        $row = 'test';
+        $result = $this->callProtected($this->dataTable,'getDataValue', array($row, 'data.test'));
+        $this->assertNull($result);
     }
 }
