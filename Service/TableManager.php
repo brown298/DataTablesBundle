@@ -3,6 +3,7 @@ namespace Brown298\DataTablesBundle\Service;
 
 use Brown298\DataTablesBundle\MetaData\Table;
 use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Exception\InvalidArgumentException;
@@ -47,16 +48,23 @@ class TableManager
     private $builtTables = array();
 
     /**
+     * @var EntityManger
+     */
+    protected $em;
+
+    /**
      * @param ContainerInterface $container
      * @param AnnotationReader $reader
      * @param array $annotationPathSearch
+     * @param EntityManager $em
      */
-    public function __construct(ContainerInterface $container, AnnotationReader $reader, array $annotationPathSearch)
+    public function __construct(ContainerInterface $container, AnnotationReader $reader, array $annotationPathSearch, EntityManager $em)
     {
         $this->annotationPathSearch = $annotationPathSearch;
         $this->reader    = $reader;
         $this->container = $container;
         $this->kernel    = $container->get('kernel');
+        $this->em        = $em;
     }
 
     /**
@@ -128,7 +136,7 @@ class TableManager
 
             switch ($table['type']) {
                 case 'annotation':
-                    $tableBuilder = new AnnotationTableBuilder($this->container, $this->reader, $table['file']);
+                    $tableBuilder = new AnnotationTableBuilder($this->container, $this->em, $this->reader, $table['file']);
                     break;
                 case 'yml':
                 /** @todo add builder for yml */

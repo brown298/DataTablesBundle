@@ -71,4 +71,14 @@ class Table
      * @var string
      */
     public $class = '';
+
+    /**
+     * @var null|string name of entity to call repsitory for
+     */
+    public $entity = null;
+
+    /**
+     * @var null|string repository function to call to get query builder
+     */
+    public $queryBuilder = null;
 }

@@ -3,6 +3,7 @@ namespace Brown298\DataTablesBundle\Service;
 
 use Brown298\DataTablesBundle\MetaData\Table;
 use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Process\Exception\InvalidArgumentException;
 
@@ -39,15 +40,22 @@ class AnnotationTableBuilder implements TableBuilderInterface
     protected $columns = array();
 
     /**
-     * @param ContainerInterface $container
-     * @param AnnotationReader $reader
-     * @param Table $table
+     * @var \Doctrine\ORM\EntityManager
      */
-    public function __construct(ContainerInterface $container, AnnotationReader $reader, Table $table)
+    protected $em;
+
+    /**
+     * @param ContainerInterface $container
+     * @param EntityManager $em
+     * @param AnnotationReader $reader
+     * @param Table $table\
+     */
+    public function __construct(ContainerInterface $container, EntityManager $em, AnnotationReader $reader, Table $table)
     {
         $this->container         = $container;
         $this->reader            = $reader;
         $this->tableAnnotations  = $table;
+        $this->em                = $em;
     }
 
     /**
@@ -118,6 +126,7 @@ class AnnotationTableBuilder implements TableBuilderInterface
 
         // pass the dependencies in, they can override them later if necessary
         $this->table->setContainer($this->container);
+        $this->table->setEm($this->em);
     }
 
     /**

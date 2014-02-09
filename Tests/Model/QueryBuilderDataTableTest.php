@@ -281,4 +281,73 @@ class QueryBuilderDataTableTest extends AbstractBaseTest
         $result = $this->callProtected($this->dataTable,'getDataValue', array($row, 'data.test'));
         $this->assertNull($result);
     }
+
+    /**
+     * testGetValueObjectUnknown
+     */
+    public function testGetValueObjectUnknown()
+    {
+        $expectedResult = 'Unknown';
+        $row            = array();
+        $source         = '';
+
+        $result = $this->callProtected($this->dataTable, 'getObjectValue', array($row, $source));
+
+        $this->assertEquals($expectedResult, $result);
+    }
+
+    /**
+     * testGetObjectValueSimple
+     */
+    public function testGetObjectValueSimple()
+    {
+        $expectedResult = 'test';
+        $row            = new test();
+        $source         = 'a.test';
+
+        $result = $this->callProtected($this->dataTable, 'getObjectValue', array($row, $source));
+
+        $this->assertEquals($expectedResult, $result);
+    }
+
+    /**
+     * testGetObjectValueDependencyObject
+     */
+    public function testGetObjectValueDependencyObject()
+    {
+        $expectedResult = 'test';
+        $row            = new test();
+        $row->data     = new Test();
+        $source         = 'a.data.test';
+
+        $result = $this->callProtected($this->dataTable, 'getObjectValue', array($row, $source));
+
+        $this->assertEquals($expectedResult, $result);
+    }
+
+    /**
+     * testGetObjectValueDependencyObjectArray
+     */
+    public function testGetObjectValueDependencyObjectArray()
+    {
+        $expectedResult = array('test','test');
+        $row            = new test();
+        $row->data      = array(new test(), new test());
+        $source         = 'a.data.test';
+
+        $result = $this->callProtected($this->dataTable, 'getObjectValue', array($row, $source));
+
+        $this->assertEquals($expectedResult, $result);
+    }
+
+}
+
+class test {
+    public $data;
+    public function getData() {
+    return $this->data;
+    }
+    public function getTest() {
+        return 'test';
+    }
 }

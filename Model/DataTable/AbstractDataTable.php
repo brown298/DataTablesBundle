@@ -151,7 +151,8 @@ abstract class AbstractDataTable implements DataTableInterface, ContainerAwareIn
         $result = 'Unknown';
 
         $tokens = explode('.', $source);
-        $name = 'get' . Inflector::classify(array_pop($tokens));
+        $currentName = array_pop($tokens);
+        $name        = 'get' . Inflector::classify($currentName);
         if (count($tokens) <= 1 && method_exists($row, $name)) {
             $result = $row->$name();
         } else {
@@ -160,9 +161,11 @@ abstract class AbstractDataTable implements DataTableInterface, ContainerAwareIn
                 if (is_object($sub) && method_exists($sub,$name)) {
                     $result = $sub->$name();
                 } elseif (is_array($sub)) {
-                    $result = array();
+                    $result          = array();
+                    $remainingTokens =  explode('.', $source);
+                    array_shift($remainingTokens);
                     foreach($sub as $d) {
-                        $result[] = $this->getObjectValue($d, implode('.', $tokens));
+                        $result[] = $this->getObjectValue($d, implode('.', $remainingTokens));
                     }
                 }
             }

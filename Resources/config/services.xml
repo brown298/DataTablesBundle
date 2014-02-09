@@ -29,6 +29,7 @@
             <argument type="service" id="service_container" />
             <argument type="service" id="data_tables.annotation_reader" />
             <argument>%data_tables.annotation_search_path%</argument>
+            <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 
         <!-- twig extensions -->
