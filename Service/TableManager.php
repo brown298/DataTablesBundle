@@ -155,7 +155,7 @@ class TableManager
                     $tableBuilder = new YmlTableBuilder($this->container, $this->em, $id,  $table['contents']);
                     break;
                 case 'xml':
-                    $tableBuilder = new YmlTableBuilder($this->container, $this->em, $id, $table['contents']);
+                    $tableBuilder = new XmlTableBuilder($this->container, $this->em, $id, $table['contents']);
                     break;
                 default:
                     Throw new InvalidArgumentException('DataTable ' . $id . ' does not have a type specified');
@@ -246,13 +246,29 @@ class TableManager
     /**
      * @param $filePath
      * @return array
+     * @throws \RuntimeException
      */
     protected function parseXml($filePath)
     {
-        $files = array();
-        /** @todo load Xml Resource */
+        $tables  = array();
+        $parser = simplexml_load_file($filePath);
 
-        return array();
+        foreach($parser->children() as $table) {
+            $id = null;
+            foreach ($table->attributes() as $key => $value) {
+                if ($key == 'id') {
+                    $id = $value->__toString();
+                }
+            }
+
+            if ($id == null) {
+                throw new \RuntimeException('XML DataTable definitions require an id attribute');
+            }
+
+            $tables[$id] = array('type' => 'xml', 'file' => $filePath, 'contents' => $table);
+        }
+
+        return $tables;
     }
 
     /**

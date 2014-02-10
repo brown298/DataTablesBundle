@@ -35,9 +35,9 @@ class XmlTableBuilder implements TableBuilderInterface
      * @param ContainerInterface $container
      * @param EntityManager $em
      * @param $tableId
-     * @param array $tableConfig
+     * @param mixed $tableConfig
      */
-    public function __construct(ContainerInterface $container, EntityManager $em, $tableId, array $tableConfig)
+    public function __construct(ContainerInterface $container, EntityManager $em, $tableId, $tableConfig)
     {
         $this->container   = $container;
         $this->tableConfig = $tableConfig;
