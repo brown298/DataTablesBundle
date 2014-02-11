@@ -73,6 +73,24 @@ class QueryBuilderDataTableTest extends AbstractBaseTest
     protected $renderer;
 
     /**
+     * @Mock
+     * @var \Doctrine\ORM\EntityManager
+     */
+    protected $em;
+
+    /**
+     * @Mock
+     * @var \Doctrine\ORM\EntityRepository
+     */
+    protected $repo;
+
+    /**
+     * @Mock
+     * @var \Brown298\DataTablesBundle\MetaData\Table
+     */
+    protected $table;
+
+    /**
      * setUp
      *
      */
@@ -288,57 +306,84 @@ class QueryBuilderDataTableTest extends AbstractBaseTest
     }
 
     /**
-     * testGetObjectValueSimple
+     * testGetSetEm
      */
-    public function testGetObjectValueSimple()
+    public function testGetSetEm()
     {
-        $expectedResult = 'test';
-        $row            = new test();
-        $source         = 'a.test';
-
-        $result = $this->callProtected($this->dataTable, 'getObjectValue', array($row, $source));
-
-        $this->assertEquals($expectedResult, $result);
+        $this->assertNull($this->dataTable->getEm());
+        $this->dataTable->setEm($this->em);
+        $this->assertEquals($this->em, $this->dataTable->getEm());
+        $this->dataTable->setEm(null);
+        $this->dataTable->setEm($this->em);
     }
 
     /**
-     * testGetObjectValueDependencyObject
+     * @expectedException \RuntimeException
      */
-    public function testGetObjectValueDependencyObject()
+    public function testGetQueryBuilderThrowsError()
     {
-        $expectedResult = 'test';
-        $row            = new test();
-        $row->data     = new Test();
-        $source         = 'a.data.test';
-
-        $result = $this->callProtected($this->dataTable, 'getObjectValue', array($row, $source));
-
-        $this->assertEquals($expectedResult, $result);
+        $this->dataTable->getQueryBuilder();
     }
 
     /**
-     * testGetObjectValueDependencyObjectArray
+     * @expectedException \RuntimeException
      */
-    public function testGetObjectValueDependencyObjectArray()
+    public function testGetQueryBulderNullEmThrowsError()
     {
-        $expectedResult = array('test','test');
-        $row            = new test();
-        $row->data      = array(new test(), new test());
-        $source         = 'a.data.test';
+        $this->dataTable->setMetaData(array('table' => $this->table));
+        $this->table->entity = 'test';
 
-        $result = $this->callProtected($this->dataTable, 'getObjectValue', array($row, $source));
-
-        $this->assertEquals($expectedResult, $result);
+        $this->dataTable->getQueryBuilder();
     }
 
-}
+    /**
+     * testGetQueryBuilder
+     * @expectedException \RuntimeException
+     */
+    public function testGetQueryBuilderMissingFunction()
+    {
+        $this->dataTable->setMetaData(array('table' => $this->table));
+        $this->table->entity       = 'test';
+        $this->table->queryBuilder = 'testing';
+        $this->dataTable->setEm($this->em);
 
-class test {
-    public $data;
-    public function getData() {
-    return $this->data;
+        $this->dataTable->getQueryBuilder();
     }
-    public function getTest() {
-        return 'test';
+
+    /**
+     * testGetQueryBuilderFunction
+     */
+    public function testGetQueryBuilderFunction()
+    {
+        $expectedResults = 'asdf';
+        $this->dataTable->setMetaData(array('table' => $this->table));
+        $this->table->entity       = 'test';
+        $this->table->queryBuilder = 'clear';
+        $this->dataTable->setEm($this->em);
+        $this->repo->testing = function() {};
+        Phake::when($this->em)->getRepository(Phake::anyParameters())->thenReturn($this->repo);
+        Phake::when($this->repo)->clear(Phake::anyParameters())->thenReturn($expectedResults);
+
+        $result = $this->dataTable->getQueryBuilder();
+
+        $this->assertEquals($expectedResults, $result);
+    }
+
+    /**
+     * testGetQueryBuilderGenerate
+     */
+    public function testGetQueryBuilderGenerate()
+    {
+        $expectedResults = 'asdf';
+        $this->dataTable->setMetaData(array('table' => $this->table));
+        $this->table->entity       = 'test';
+        $this->dataTable->setEm($this->em);
+        $this->repo->testing = function() {};
+        Phake::when($this->em)->getRepository(Phake::anyParameters())->thenReturn($this->repo);
+        Phake::when($this->repo)->createQueryBuilder(Phake::anyParameters())->thenReturn($expectedResults);
+
+        $result = $this->dataTable->getQueryBuilder();
+
+        $this->assertEquals($expectedResults, $result);
     }
 }

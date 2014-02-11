@@ -41,9 +41,6 @@ abstract class AbstractQueryBuilderDataTable extends AbstractDataTable implement
     public function getData(Request $request, $dataFormatter = null)
     {
         $this->queryBuilder = $this->getQueryBuilder($request);
-        if ($this->queryBuilder == null) {
-            return null;
-        }
 
         return $this->getDataByQueryBuilder($request, $this->queryBuilder, $dataFormatter);
     }
