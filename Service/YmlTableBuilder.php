@@ -7,20 +7,15 @@ use Brown298\DataTablesBundle\MetaData\Format;
 use Brown298\DataTablesBundle\MetaData\Table;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Process\Exception\InvalidArgumentException;
 use Symfony\Component\Yaml\Parser;
 
 /**
  * Class YmlTableBuilder
  * @package Brown298\DataTablesBundle\Service
  */
-class YmlTableBuilder implements TableBuilderInterface
+class YmlTableBuilder extends AbstractTableBuilder implements TableBuilderInterface
 {
-
-    /**
-     * @var array
-     */
-    protected $args;
-
     /**
      * @var \Symfony\Component\DependencyInjection\ContainerInterface
      */
@@ -117,6 +112,8 @@ class YmlTableBuilder implements TableBuilderInterface
 
     /**
      * buildMetaData
+     *
+     * build the columns and other metadata for this class
      */
     protected function buildMetaData()
     {
@@ -136,8 +133,16 @@ class YmlTableBuilder implements TableBuilderInterface
                 }
             }
 
+            if (!isset($column->source)) {
+                throw new InvalidArgumentException('DataTables requires a "source" attribute be provided for a column');
+            }
+
+            if (!isset($column->name)) {
+                throw new InvalidArgumentException('DataTables requires a "name" attribute be provided for a column');
+            }
+
             $this->columns[]  = $column;
-            $columnArray[$id] = $column->name;
+            $columnArray[$column->source] = $column->name;
         }
 
         $this->table->setColumns($columnArray);
@@ -149,56 +154,5 @@ class YmlTableBuilder implements TableBuilderInterface
         );
     }
 
-    /**
-     * @param $table
-     * @return string
-     */
-    protected function getClassName($table)
-    {
-        if (isset($table->class) && $table->class != null) {
-            $className = $table->class;
-        } else {
-            $className = 'Brown298\DataTablesBundle\Test\DataTable\QueryBuilderDataTable';
-        }
-        return $className;
-    }
 
-
-    /**
-     * creates the table
-     */
-    protected function buildTable()
-    {
-        $this->parse();
-        $className = $this->getClassName($this->tableConfig);
-
-        array_shift($this->args);
-
-        if(!empty($this->args)) {
-            $ref         = new \ReflectionClass($className);
-            $this->table = $ref->newInstanceArgs($this->args);
-        } else {
-            $this->table = new $className;
-        }
-
-        // pass the dependencies in, they can override them later if necessary
-        $this->table->setContainer($this->container);
-        $this->table->setEm($this->em);
-        $this->table->hydrateObjects = true;
-    }
-
-    /**
-     * build
-     *
-     * @param array $args
-     * @return mixed
-     */
-    public function build(array $args = array())
-    {
-        $this->args = $args;
-        $this->buildTable();
-        $this->buildMetaData();
-
-        return $this->table;
-    }
 }
