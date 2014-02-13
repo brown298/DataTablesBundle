@@ -1,10 +1,12 @@
 <?php
 namespace Brown298\DataTablesBundle\Model\DataTable;
 
+use Doctrine\Common\Inflector\Inflector;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Brown298\DataTablesBundle\Model\DataTable\DataTableInterface;
 
 /**
  * Class AbstractDataTable
@@ -28,6 +30,11 @@ abstract class AbstractDataTable implements DataTableInterface, ContainerAwareIn
      * @var null
      */
     protected $container = null;
+
+    /**
+     * @var null
+     */
+    protected $metaData = null;
 
     /**
      * __construct
@@ -87,10 +94,111 @@ abstract class AbstractDataTable implements DataTableInterface, ContainerAwareIn
     }
 
     /**
+     * @param $row
+     * @return array
+     */
+    public function getColumnRendering($row)
+    {
+        $result = array();
+        foreach($this->metaData['columns'] as $column) {
+            if (isset($column->format)) {
+                $args = array();
+                foreach($column->format->dataFields as $name => $source) {
+                    $args[$name] = $this->getDataValue($row, $source);
+                }
+                if ($column->format->template != null) {
+                    $renderer = $this->container->get('templating');
+                    $result[] = $renderer->render($column->format->template, $args);
+                } else { // no render so send back the raw data
+                    $result[] = $args;
+                }
+            } else {
+                $result[] = $this->getDataValue($row, $column->source);
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * @param $row
+     * @param $source
+     * @return null
+     */
+    protected function getDataValue($row, $source)
+    {
+        $result = null;
+        if (is_object($row)) {
+            $result = $this->getObjectValue($row, $source);
+        } else if(is_array($row)) {
+            $tokens  = explode('.', $source);
+            $current = array_pop($tokens);
+            if (isset($row[$current])) {
+                $result = $row[$current];
+            } else {
+                $result = 'Unknown Value at ' . $current;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * getObject Value
+     *
+     * allows for relations based on things like faq.createdBy.id
+     *
+     * @param $row
+     * @param $source
+     * @return string
+     */
+    protected function getObjectValue($row, $source)
+    {
+        $result = 'Unknown';
+
+        $tokens = explode('.', $source);
+        $currentName = array_pop($tokens);
+        $name        = 'get' . Inflector::classify($currentName);
+        if (count($tokens) <= 1 && method_exists($row, $name)) {
+            $result = $row->$name();
+        } else {
+            if (count($tokens) > 1) {
+                $sub = $this->getObjectValue($row, implode('.', $tokens));
+                if (is_object($sub) && method_exists($sub,$name)) {
+                    $result = $sub->$name();
+                } elseif (is_array($sub)) {
+                    $result          = array();
+                    $remainingTokens =  explode('.', $source);
+                    array_shift($remainingTokens);
+                    foreach($sub as $d) {
+                        $result[] = $this->getObjectValue($d, implode('.', $remainingTokens));
+                    }
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * @return null
      */
     public function getDataFormatter()
     {
+        if ($this->dataFormatter == null && !empty($this->metaData)) {
+            $table = $this;
+            $this->dataFormatter = function($data) use ($table) {
+                $count   = 0;
+                $results = array();
+
+                foreach ($data as $row) {
+                    $results[$count] = $table->getColumnRendering($row);
+                    $count +=1;
+                }
+
+                return $results;
+            };
+        }
+
         return $this->dataFormatter;
     }
 
@@ -143,5 +251,23 @@ abstract class AbstractDataTable implements DataTableInterface, ContainerAwareIn
 
         return $this->getJsonResponse($request, $dataFormatter);
     }
+
+    /**
+     * @param array $metaData
+     * @return mixed|void
+     */
+    public function setMetaData(array $metaData = null)
+    {
+        $this->metaData = $metaData;
+    }
+
+    /**
+     * @return null
+     */
+    public function getMetaData()
+    {
+        return $this->metaData;
+    }
+
 
 }

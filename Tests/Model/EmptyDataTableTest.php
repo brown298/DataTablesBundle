@@ -38,6 +38,11 @@ class EmptyDataTableTest extends AbstractBaseTest
     protected $logger;
 
     /**
+     * @var \Brown298\DataTablesBundle\MetaData\Column
+     */
+    protected $column;
+
+    /**
      * setUp
      */
     public function setUp()
@@ -47,6 +52,7 @@ class EmptyDataTableTest extends AbstractBaseTest
         $this->request           = Phake::mock('Symfony\Component\HttpFoundation\Request');
         $this->dataTablesService = Phake::mock('Brown298\DataTablesBundle\Service\ServerProcessService');
         $this->logger            = Phake::mock('\Psr\Log\LoggerInterface');
+        $this->column            = Phake::mock('\Brown298\DataTablesBundle\MetaData\Column');
 
         Phake::when($this->container)->get('logger')->thenReturn($this->logger);
 
@@ -167,5 +173,138 @@ class EmptyDataTableTest extends AbstractBaseTest
         $result = $this->dataTable->processRequest($this->request);
 
         $this->assertInstanceOf('Symfony\Component\HttpFoundation\JsonResponse', $result);
+    }
+
+    /**
+     * testGetDataValueEmpty
+     */
+    public function testGetDataValueEmpty()
+    {
+        $row = array();
+        $expectedResult = 'Unknown Value at test';
+
+        $result = $this->callProtected($this->dataTable,'getDataValue', array($row, 'data.test'));
+
+        $this->assertEquals($expectedResult, $result);
+    }
+
+    /**
+     * testGetDataValueObject
+     */
+    public function testGetDataValueObject()
+    {
+        $expectedResult = 'test';
+        $row            = new test();
+        $source         = 'a.test';
+
+        $result = $this->callProtected($this->dataTable,'getDataValue', array($row, $source));
+
+        $this->assertEquals($expectedResult, $result);
+    }
+
+
+    /**
+     * testGetObjectValueSimple
+     */
+    public function testGetObjectValueSimple()
+    {
+        $expectedResult = 'test';
+        $row            = new test();
+        $source         = 'a.test';
+
+        $result = $this->callProtected($this->dataTable, 'getObjectValue', array($row, $source));
+
+        $this->assertEquals($expectedResult, $result);
+    }
+
+    /**
+     * testGetObjectValueDependencyObject
+     */
+    public function testGetObjectValueDependencyObject()
+    {
+        $expectedResult = 'test';
+        $row            = new test();
+        $row->data     = new Test();
+        $source         = 'a.data.test';
+
+        $result = $this->callProtected($this->dataTable, 'getObjectValue', array($row, $source));
+
+        $this->assertEquals($expectedResult, $result);
+    }
+
+    /**
+     * testGetObjectValueDependencyObjectArray
+     */
+    public function testGetObjectValueDependencyObjectArray()
+    {
+        $expectedResult = array('test','test');
+        $row            = new test();
+        $row->data      = array(new test(), new test());
+        $source         = 'a.data.test';
+
+        $result = $this->callProtected($this->dataTable, 'getObjectValue', array($row, $source));
+
+        $this->assertEquals($expectedResult, $result);
+    }
+
+    /**
+     * testGetDatFormatterWithMetaReturnsClosure
+     */
+    public function testGetDatFormatterWithMetaReturnsClosure()
+    {
+        $this->dataTable->setMetaData(array('test'));
+
+        $result = $this->dataTable->getDataFormatter();
+
+        $this->assertInstanceOf('\Closure', $result);
+    }
+
+    /**
+     * testGetDataFormatterClosureEmpty
+     */
+    public function testGetDataFormatterClosureEmpty()
+    {
+        $data = array();
+        $expectedResults = array();
+
+        $this->dataTable->setMetaData(array('test'));
+        $formatter = $this->dataTable->getDataFormatter();
+
+        if ($formatter instanceof \Closure) {
+            $result =  $formatter($data);
+        }
+
+        $this->assertEquals($expectedResults, $result);
+    }
+
+    /**
+     * testGetDataFormatterClosure
+     */
+    public function testGetDataFormatterClosure()
+    {
+        $data = array('a.test' => 'value');
+        $expectedResults = array(
+            array(null),
+        );
+
+        $this->dataTable->setMetaData(array('columns' => array($this->column)));
+        $formatter = $this->dataTable->getDataFormatter();
+
+        if ($formatter instanceof \Closure) {
+            $result =  $formatter($data);
+        }
+
+        $this->assertEquals($expectedResults, $result);
+    }
+}
+
+
+class test {
+    public $data;
+    public function getData() {
+        return $this->data;
+    }
+    public function getTest() {
+        return 'test';
     }
 }

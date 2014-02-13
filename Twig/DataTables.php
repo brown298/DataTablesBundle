@@ -1,15 +1,42 @@
 <?php
 namespace Brown298\DataTablesBundle\Twig;
 
+use \Brown298\DataTablesBundle\Model\DataTable\DataTableInterface;
+
 /**
  * Class DataTables
  *
  * @package Brown298\DataTablesBundle\Twig
  * @author John Brown <brown.john@gmail.com>
  */
-
 class DataTables extends \Twig_Extension
 {
+    /**
+     * @var
+     */
+    protected $defaults = array(
+        'table_template'  => 'Brown298DataTablesBundle::table.html.twig',
+        'script_template' => 'Brown298DataTablesBundle::script.html.twig',
+        'id'              => 'dataTable',
+        'bProcessing'     => 1,
+        'bHidePaginate'   => 1,
+        'bServerSide'     => 1,
+        'bLengthChange'   => 0,
+        'bFilter'         => 0,
+        'bDeferLoading'   => 0,
+        'bSort'           => 1,
+        'sPaginationType' => 'full_numbers',
+        'bInfo'           => 0,
+        'bPaginate'       => 1,
+        'bHidePaginate'   => 1,
+        'path'            => '#',
+        'iDisplayLength'  => -1,
+        'table_class'     => 'display dataTable table table-striped',
+        'aaData'          => null,
+        'twigVars'        => array(),
+        'customParams'    => array(),
+    );
+
     /**
      * @var array
      */
@@ -24,6 +51,11 @@ class DataTables extends \Twig_Extension
      * @var Twig_Environment
      */
     private $environment;
+
+    /**
+     * @var \Brown298\DataTablesBundle\Model\DataTable\DataTableInterface
+     */
+    private $dataTable = null;
 
     /**
      * initRuntime
@@ -111,38 +143,115 @@ class DataTables extends \Twig_Extension
      *
      * @return string
      */
-    public function addDataTable(array $columns, $params = array())
+    public function addDataTable($columns, $params = array())
     {
-        $this->columns = $columns;
+        if ($columns instanceof DataTableInterface) {
+            $this->dataTable = $columns;
+            $this->columns   = $this->dataTable->getColumns();
+        } else {
+            $this->columns = $columns;
+        }
+
+        $this->params = $this->buildParams($params);
+
+        return $this->renderJs() . $this->renderTable();
+    }
+
+    /**
+     * @param $params
+     * @return array
+     */
+    protected function buildParams($params)
+    {
         if (!is_array($params)) {
             $params = array();
         }
 
-        $this->params = array_merge(
-            array(
-                'table_template'  => 'Brown298DataTablesBundle::table.html.twig',
-                'script_template' => 'Brown298DataTablesBundle::script.html.twig',
-                'id'              => 'dataTable',
-                'bProcessing'     => 1,
-                'bServerSide'     => 1,
-                'bLengthChange'   => 0,
-                'bFilter'         => 0,
-                'bSort'           => 1,
-                'sPaginationType' => 'full_numbers',
-                'bInfo'           => 0,
-                'bPaginate'       => 1,
-                'bHidePaginate'   => 1,
-                'path'            => '#',
-                'iDisplayLength'  => -1,
-                'table_class'     => 'display dataTable table table-striped',
-                'aaData'          => null,
-                'twigVars'        => array(),
-                'customParams'    => array(),
-            ),
-            $params
-        );
+        if ($this->dataTable != null) {
+            $this->buildDefaults();
+        }
 
-        return $this->renderJs() . $this->renderTable();
+        $params = array_merge($this->defaults, $params);
+        return $params;
+    }
+
+    /**
+     *
+     */
+    protected function buildDefaults()
+    {
+        $meta = $this->dataTable->getMetaData();
+
+        if (is_array($meta)) {
+            // table defaults
+            if (isset($meta['table'])) {
+                $table = $meta['table'];
+                $this->defaults['id']              = $table->id;
+                $this->defaults['bDeferLoading']   = $table->deferLoading;
+                $this->defaults['bServerSide']     = $table->serverSideProcessing;
+                $this->defaults['bInfo']           = $table->info;
+                $this->defaults['bLengthChange']   = $table->changeLength;
+                $this->defaults['bProcessing']     = $table->processing;
+                $this->defaults['iDisplayLength']  = $table->displayLength;
+                $this->defaults['bPaginate']       = $table->paginate;
+                $this->defaults['bSort']           = $table->sortable;
+                $this->defaults['bFilter']         = $table->searchable;
+                $this->defaults['sPaginationType'] = $table->paginationType;
+            }
+
+            // column data
+            if (isset($meta['columns'])) {
+                $columns = $meta['columns'];
+                $this->defaults['aoColumns'] = $this->buildColumnDefs($columns);
+            }
+        }
+    }
+
+    /**
+     * @param array $columns
+     * @return array
+     */
+    protected function buildColumnDefs(array $columns = array())
+    {
+        $count   = 0;
+        $results = array();
+
+        foreach($columns as $column) {
+            $data = array();
+
+            if ($column->sortable == false) {
+                $data['bSort']    = false;
+            }
+
+            if ($column->searchable == false) {
+                $data['bFilter']    = false;
+            }
+
+            if ($column->visible == false) {
+                $data['bVisible']    = false;
+            }
+
+            if ($column->class != null) {
+                $data['sClass'] = $column->class;
+            }
+
+            if ($column->width != null) {
+                $data['sWidth'] = $column->width;
+            }
+
+            if ($column->defaultSort) {
+                $data['iDataSort'] = $count;
+            }
+
+            if (!empty($data)) {
+                $results[] = $data;
+            } else {
+                $results[] = null;
+            }
+            $count+=1;
+        }
+
+        return $results;
     }
 
     /**
@@ -176,6 +285,7 @@ class DataTables extends \Twig_Extension
             'aoColumns',
             'bLengthChange',
             'bFilter',
+            'bDeferLoading',
             'bPaginate',
             'bProcessing',
             'bServerSide',

@@ -60,6 +60,7 @@ class RepositoryDataTableTest extends AbstractBaseTest
      */
     protected $repository;
 
+
     /**
      * setUp
      *
@@ -213,4 +214,34 @@ class RepositoryDataTableTest extends AbstractBaseTest
         Phake::verify($this->service)->setRepository($this->repository);
         Phake::verify($this->service)->aaaah(Phake::anyParameters());
     }
+
+    /**
+     * testGetDataNull
+     */
+    public function testGetDataNull()
+    {
+        Phake::when($this->container)->get(Phake::anyParameters())->thenReturn($this->service);
+
+        $this->assertNull($this->dataTable->getData($this->request));
+    }
+
+    /**
+     * testGetData
+     */
+    public function testGetData()
+    {
+        $expectedResult = 'test';
+        Phake::when($this->service)->process(Phake::anyParameters())->thenReturn($expectedResult);
+        Phake::when($this->container)->get(Phake::anyParameters())->thenReturn($this->service);
+        $this->dataTable->setRepository($this->repository);
+        $this->dataTable->setRepository($this->repository);
+
+        $result = $this->dataTable->getData($this->request);
+
+        $this->assertEquals($expectedResult, $result);
+        Phake::verify($this->service)->setRequest($this->request);
+        Phake::verify($this->service)->setRepository($this->repository);
+
+    }
+
 } 
