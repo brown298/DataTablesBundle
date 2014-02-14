@@ -410,4 +410,17 @@ class DataTablesTest extends AbstractBaseTest
         $defaults = $this->getProtectedValue($this->service, 'defaults');
         $this->assertEquals($value, $defaults[$arrayName]);
     }
+
+    /**
+     * testBuildColumnDefsSetsIDataSort
+     */
+    public function testBuildColumnDefsSetsIDataSort()
+    {
+        $this->column->defaultSort = true;
+
+        $result = $this->callProtected($this->service,'buildColumnDefs', array(array($this->column)));
+
+        $this->assertArrayHasKey('iDataSort', $result[0]);
+        $this->assertEquals(0, $result[0]['iDataSort']);
+    }
 } 
