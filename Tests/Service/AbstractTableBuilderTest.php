@@ -106,7 +106,7 @@ class AbstractTableBuilderTest extends AbstractBaseTest
     }
 
     /**
-     *
+     * buildTableArgs
      */
     public function buildTableArgs()
     {
