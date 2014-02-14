@@ -20,6 +20,12 @@ class DataTablesTest extends AbstractBaseTest
     private $environment;
 
     /**
+     * @Mock
+     * @var \Brown298\DataTablesBundle\Model\DataTable\DataTableInterface
+     */
+    protected $dataTable;
+
+    /**
      * @var \Brown298\DataTablesBundle\Twig\DataTables
      */
     protected $service;
@@ -266,5 +272,32 @@ class DataTablesTest extends AbstractBaseTest
     {
         $result = $this->callProtected($this->service, 'isJsonObject', array($object));
         $this->assertEquals($expectedResult, $result, 'Error: isJsonObject returned ' . ($result ? 'True':'False') . ' on ' . $object);
+    }
+
+    /**
+     * testAddDataTableGetsColumns
+     */
+    public function testAddDataTableGetsColumns()
+    {
+        $this->service->initRuntime($this->environment);
+
+        $this->service->addDataTable($this->dataTable);
+
+        Phake::verify($this->dataTable)->getColumns();
+        $this->assertEquals($this->dataTable, $this->getProtectedValue($this->service, 'dataTable'));
+    }
+
+    /**
+     * testBuildParamsCallsBuildDefaults
+     */
+    public function testBuildParamsCallsBuildDefaults()
+    {
+        $this->service = Phake::partialMock('\Brown298\DataTablesBundle\Twig\DataTables');
+        $this->service->initRuntime($this->environment);
+        Phake::when($this->service)->builParams()->thenReturn(null);
+
+        $this->service->addDataTable($this->dataTable);
+
+        Phake::verify($this->service)->buildDefaults();
     }
 } 
