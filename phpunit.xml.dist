@@ -17,6 +17,15 @@
         </testsuite>
     </testsuites>
     <filter>
+        <whitelist>
+            <directory>Controller</directory>
+            <directory>DependencyInjection</directory>
+            <directory>Exceptions</directory>
+            <directory>MetaData</directory>
+            <directory>Model</directory>
+            <directory>service</directory>
+            <directory>Twig</directory>
+        </whitelist>
         <blacklist>
             <directory>vendor</directory>
         </blacklist>
