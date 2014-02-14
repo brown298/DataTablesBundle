@@ -32,6 +32,13 @@ class DataTablesTest extends AbstractBaseTest
     protected $column;
 
     /**
+     * @Mock
+     * @var \Brown298\DataTablesBundle\MetaData\Table
+     */
+    protected $table;
+
+
+    /**
      * @var \Brown298\DataTablesBundle\Twig\DataTables
      */
     protected $service;
@@ -319,6 +326,11 @@ class DataTablesTest extends AbstractBaseTest
             array('searchable', 'bFilter', true, false),
             array('visible', 'bVisible', false, true),
             array('visible', 'bVisible', true, false),
+            array('class', 'sClass', 'testClass', true),
+            array('class', 'sClass', null, false),
+            array('width', 'sWidth', '20', true),
+            array('width', 'sWidth', null, false),
+            array('defaultSort', 'iDataSort', null, false),
         );
     }
 
@@ -344,5 +356,58 @@ class DataTablesTest extends AbstractBaseTest
         } else {
             $this->assertNull($result[0]);
         }
+    }
+
+    /**
+     * testbuildDefaultsCallsBuildColumns
+     */
+    public function testbuildDefaultsCallsBuildColumns()
+    {
+        $meta = array('table'=> $this->table, 'columns' => array($this->column));
+        $this->setProtectedValue($this->service,'dataTable', $this->dataTable);
+        Phake::when($this->dataTable)->getMetaData()->thenReturn($meta);
+
+        $this->callProtected($this->service, 'buildDefaults');
+
+        $defaults = $this->getProtectedValue($this->service, 'defaults');
+        $this->assertArrayHasKey('aoColumns', $defaults);
+    }
+
+    /**
+     * @return array
+     */
+    public function buildDefaultsSetsDefaultsProvider() {
+        return array(
+            array('id', 'id', rand(0,100)),
+            array('deferLoading', 'bDeferLoading', rand(0,100)),
+            array('serverSideProcessing', 'bServerSide', rand(0,100)),
+            array('info', 'bInfo', rand(0,100)),
+            array('changeLength', 'bLengthChange', rand(0,100)),
+            array('processing', 'bProcessing', rand(0,100)),
+            array('displayLength', 'iDisplayLength', rand(0,100)),
+            array('paginate', 'bPaginate', rand(0,100)),
+            array('sortable', 'bSort', rand(0,100)),
+            array('searchable', 'bFilter', rand(0,100)),
+            array('paginationType', 'sPaginationType', rand(0,100)),
+        );
+    }
+
+    /**
+     * @param $name
+     * @param $arrayName
+     * @param $value
+     * @dataProvider buildDefaultsSetsDefaultsProvider
+     */
+    public function testBuildDefaultsSetsDefaults($name, $arrayName, $value)
+    {
+        $this->table->$name = $value;
+        $meta = array('table'=> $this->table, 'columns' => array($this->column));
+        $this->setProtectedValue($this->service,'dataTable', $this->dataTable);
+        Phake::when($this->dataTable)->getMetaData()->thenReturn($meta);
+
+        $this->callProtected($this->service, 'buildDefaults');
+
+        $defaults = $this->getProtectedValue($this->service, 'defaults');
+        $this->assertEquals($value, $defaults[$arrayName]);
     }
 } 
