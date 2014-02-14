@@ -26,6 +26,12 @@ class DataTablesTest extends AbstractBaseTest
     protected $dataTable;
 
     /**
+     * @Mock
+     * @var \Brown298\DataTablesBundle\MetaData\Column
+     */
+    protected $column;
+
+    /**
      * @var \Brown298\DataTablesBundle\Twig\DataTables
      */
     protected $service;
@@ -299,5 +305,44 @@ class DataTablesTest extends AbstractBaseTest
         $this->service->addDataTable($this->dataTable);
 
         Phake::verify($this->service)->buildDefaults();
+    }
+
+    /**
+     * @return array
+     */
+    public function buildColumnDefProvider()
+    {
+        return array(
+            array('sortable', 'bSort', true, false),
+            array('sortable', 'bSort', false, true),
+            array('searchable', 'bFilter', false, true),
+            array('searchable', 'bFilter', true, false),
+            array('visible', 'bVisible', false, true),
+            array('visible', 'bVisible', true, false),
+        );
+    }
+
+    /**
+     * testBuildColumnDef
+     *
+     * @param $fieldName
+     * @param $arrayName
+     * @param $value
+     * @param $isset
+     *
+     * @dataProvider buildColumnDefProvider
+     */
+    public function testBuildColumnDef($fieldName, $arrayName, $value, $isset)
+    {
+        $this->column->$fieldName = $value;
+
+        $result = $this->callProtected($this->service,'buildColumnDefs', array(array($this->column)));
+
+        if ($isset) {
+            $this->assertArrayHasKey($arrayName, $result[0]);
+            $this->assertEquals($value, $result[0][$arrayName]);
+        } else {
+            $this->assertNull($result[0]);
+        }
     }
 } 
