@@ -23,7 +23,7 @@
             <directory>Exceptions</directory>
             <directory>MetaData</directory>
             <directory>Model</directory>
-            <directory>service</directory>
+            <directory>Service</directory>
             <directory>Twig</directory>
         </whitelist>
         <blacklist>
