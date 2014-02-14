@@ -40,11 +40,6 @@ class AnnotationTableBuilder extends AbstractTableBuilder implements TableBuilde
     protected $defaultSortNs = 'Brown298\DataTablesBundle\MetaData\DefaultSort';
 
     /**
-     * @var \Doctrine\ORM\EntityManager
-     */
-    protected $em;
-
-    /**
      * @param ContainerInterface $container
      * @param EntityManager $em
      * @param AnnotationReader $reader

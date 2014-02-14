@@ -17,16 +17,6 @@ class XmlTableBuilder extends AbstractTableBuilder implements TableBuilderInterf
 {
 
     /**
-     * @var \Symfony\Component\DependencyInjection\ContainerInterface
-     */
-    protected $container;
-
-    /**
-     * @var \Doctrine\ORM\EntityManager
-     */
-    protected $em;
-
-    /**
      * @var SimpleXMLElement
      */
     protected $rawTableConfig;

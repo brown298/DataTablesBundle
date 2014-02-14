@@ -6,6 +6,11 @@ abstract class AbstractTableBuilder implements TableBuilderInterface
 {
 
     /**
+     * @var \Symfony\Component\DependencyInjection\ContainerInterface
+     */
+    protected $container;
+
+    /**
      * @var array
      */
     protected $args;
@@ -24,6 +29,12 @@ abstract class AbstractTableBuilder implements TableBuilderInterface
      * @var string
      */
     protected $tableId;
+
+    /**
+     * @var \Doctrine\ORM\EntityManager
+     */
+    protected $em;
+
 
     /**
      * build
@@ -96,4 +107,22 @@ abstract class AbstractTableBuilder implements TableBuilderInterface
     {
 
     }
+
+    /**
+     * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
+     */
+    public function setContainer($container)
+    {
+        $this->container = $container;
+    }
+
+
+    /**
+     * @param \Doctrine\ORM\EntityManager $em
+     */
+    public function setEm($em)
+    {
+        $this->em = $em;
+    }
+
 }

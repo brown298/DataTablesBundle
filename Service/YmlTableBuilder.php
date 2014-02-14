@@ -16,15 +16,6 @@ use Symfony\Component\Yaml\Parser;
  */
 class YmlTableBuilder extends AbstractTableBuilder implements TableBuilderInterface
 {
-    /**
-     * @var \Symfony\Component\DependencyInjection\ContainerInterface
-     */
-    protected $container;
-
-    /**
-     * @var \Doctrine\ORM\EntityManager
-     */
-    protected $em;
 
     /**
      * @var string
