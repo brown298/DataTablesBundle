@@ -3,6 +3,7 @@
 This bundle adds DataTables ajax functionality to your Symfony2/Doctrine project.
 
 ![Build Status](http://rbsolutions.dyndns.org:8080/buildStatus/icon?job=DataTables)
+[![SensioLabsInsight](https://insight.sensiolabs.com/projects/7fc69c53-74a5-4be0-9bea-c126436369df/mini.png)](https://insight.sensiolabs.com/projects/7fc69c53-74a5-4be0-9bea-c126436369df)
 
 ## Install
 Add the package brown298\datatables to your composer.json
