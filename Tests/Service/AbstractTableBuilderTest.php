@@ -93,7 +93,31 @@ class AbstractTableBuilderTest extends AbstractBaseTest
         $this->assertTrue($table->hydrateObjects);
         $this->assertEquals($this->em, $this->getProtectedValue($table,'em'));
         $this->assertEquals($this->container,  $this->getProtectedValue($table,'container'));
+    }
 
+    /**
+     * testBuildGetsDefaultTable
+     */
+    public function testBuildGetsDefaultTable()
+    {
+        $args  = array('test');
+        $table = $this->tableBuilder->build($args);
+        $this->assertInstanceOf('Brown298\DataTablesBundle\Test\DataTable\QueryBuilderDataTable', $table);
+    }
+
+    /**
+     *
+     */
+    public function buildTableArgs()
+    {
+        $this->setProtectedValue($this->tableBuilder, 'args', array('test','anArg'));
+        $this->callProtected($this->tableBuilder,'buildTable');
+
+        $table = $this->getProtectedValue($this->tableBuilder, 'table');
+        $this->assertInstanceOf('Brown298\DataTablesBundle\Test\DataTable\QueryBuilderDataTable', $table);
+        $this->assertTrue($table->hydrateObjects);
+        $this->assertEquals($this->em, $this->getProtectedValue($table,'em'));
+        $this->assertEquals($this->container,  $this->getProtectedValue($table,'container'));
     }
 
 
