@@ -100,8 +100,10 @@ class TableManager
         $directories = array();
         $bundles     = $this->getBundles();
 
-        foreach ($bundles as $name => $namespace) {
-            $directories[$name] = $this->kernel->getBundle($name)->getPath();
+        if (count($bundles) > 0) {
+            foreach ($bundles as $name => $namespace) {
+                $directories[$name] = $this->kernel->getBundle($name)->getPath();
+            }
         }
 
         return $directories;

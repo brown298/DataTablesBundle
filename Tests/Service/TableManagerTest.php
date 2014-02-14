@@ -77,6 +77,14 @@ class TableManagerTest extends AbstractBaseTest
         $this->assertFalse($this->tableManager->hasTable('testing'));
     }
 
-
+    /**
+     * testHasBuiltTableFalse
+     */
+    public function testHasBuiltTableFalse()
+    {
+        $tables = array();
+        $this->setProtectedValue($this->tableManager,'tables', $tables);
+        $this->assertFalse($this->tableManager->hasBuiltTable('test'));
+    }
 
 }
