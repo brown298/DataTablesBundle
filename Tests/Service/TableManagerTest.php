@@ -33,6 +33,16 @@ class TableManagerTest extends AbstractBaseTest
     protected $tableManager;
 
     /**
+     * @var \Symfony\Component\HttpKernel\Kernel
+     */
+    private $kernel;
+
+    /**
+     * @var Symfony\Component\HttpKernel\Bundle\Bundle
+     */
+    protected $bundle;
+
+    /**
      * setUp
      */
     public function setUp()
@@ -40,7 +50,11 @@ class TableManagerTest extends AbstractBaseTest
         parent::setUp();
         $this->container = Phake::Mock('\Symfony\Component\DependencyInjection\ContainerInterface');
         $this->em        = Phake::Mock('\Doctrine\ORM\EntityManager');
-        $this->reader        = Phake::Mock('\Doctrine\Common\Annotations\AnnotationReader');
+        $this->reader    = Phake::Mock('\Doctrine\Common\Annotations\AnnotationReader');
+        $this->kernel    = Phake::Mock('\Symfony\Component\HttpKernel\Kernel');
+        $this->bundle    = Phake::Mock('Symfony\Component\HttpKernel\Bundle\Bundle');
+
+        Phake::when($this->container)->get('kernel')->thenReturn($this->kernel);
 
         $this->tableManager = new TableManager($this->container, $this->reader, array(), array(), $this->em);
     }
@@ -87,4 +101,30 @@ class TableManagerTest extends AbstractBaseTest
         $this->assertFalse($this->tableManager->hasBuiltTable('test'));
     }
 
+    /**
+     * testHasBuiltTableTrue
+     */
+    public function testHasBuiltTableTrue()
+    {
+        $tables = array('test' =>'value');
+        $this->setProtectedValue($this->tableManager,'tables', $tables);
+        $this->setProtectedValue($this->tableManager,'builtTables', $tables);
+        $this->assertTrue($this->tableManager->hasBuiltTable('test'));
+    }
+
+    /**
+     * testGetBundleDirectories
+     */
+    public function testGetBundleDirectories()
+    {
+        $expectedResult = 'test';
+        $bundles        = array('bundle' => 'namespace');
+        Phake::when($this->container)->getParameter('kernel.bundles')->thenReturn($bundles);
+        Phake::when($this->kernel)->getBundle('bundle')->thenReturn($this->bundle);
+        Phake::when($this->bundle)->getPath()->thenReturn($expectedResult);
+
+        $result = $this->callProtected($this->tableManager,'getBundleDirectories');
+
+        $this->assertEquals(array('bundle'=> $expectedResult), $result);
+    }
 }
