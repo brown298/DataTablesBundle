@@ -108,9 +108,9 @@ class AbstractTableBuilderTest extends AbstractBaseTest
     /**
      * buildTableArgs
      */
-    public function buildTableArgs()
+    public function testBuildTableArgs()
     {
-        $this->setProtectedValue($this->tableBuilder, 'args', array('test','anArg','another.arg'));
+        $this->setProtectedValue($this->tableBuilder, 'args', array('test',array('anArg')));
         $this->callProtected($this->tableBuilder,'buildTable');
 
         $table = $this->getProtectedValue($this->tableBuilder, 'table');
@@ -119,8 +119,6 @@ class AbstractTableBuilderTest extends AbstractBaseTest
         $this->assertEquals($this->em, $this->getProtectedValue($table,'em'));
         $this->assertEquals($this->container,  $this->getProtectedValue($table,'container'));
     }
-
-
 }
 
 /**

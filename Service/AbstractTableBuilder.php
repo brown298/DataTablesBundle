@@ -85,7 +85,7 @@ abstract class AbstractTableBuilder implements TableBuilderInterface
 
         array_shift($this->args);
 
-        if(!empty($this->args)) {
+        if(is_array($this->args) && !empty($this->args) ) {
             $ref         = new \ReflectionClass($className);
             $this->table = $ref->newInstanceArgs($this->args);
         } else {

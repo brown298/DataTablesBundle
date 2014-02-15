@@ -127,4 +127,47 @@ class TableManagerTest extends AbstractBaseTest
 
         $this->assertEquals(array('bundle'=> $expectedResult), $result);
     }
+
+    /**
+     * testGetPossibleDirectoriesNonDir
+     */
+    public function testGetPossibleDirectoriesNonDir()
+    {
+        $searchPath     = array('dir');
+        $expectedResult = 'test';
+        $bundles        = array('bundle' => 'namespace');
+        Phake::when($this->container)->getParameter('kernel.bundles')->thenReturn($bundles);
+        Phake::when($this->kernel)->getBundle('bundle')->thenReturn($this->bundle);
+        Phake::when($this->bundle)->getPath()->thenReturn($expectedResult);
+
+        $result = $this->callProtected($this->tableManager, 'getPossibleDirectories', array($searchPath));
+
+        $this->assertEquals(array(), $result);
+    }
+
+    /**
+     * testGetPossibleDirectoriesDir
+     */
+    public function testGetPossibleDirectoriesDir()
+    {
+        $searchPath     = array('tmp');
+        $expectedResult = '/';
+        $bundles        = array('bundle' => '');
+        Phake::when($this->container)->getParameter('kernel.bundles')->thenReturn($bundles);
+        Phake::when($this->kernel)->getBundle('bundle')->thenReturn($this->bundle);
+        Phake::when($this->bundle)->getPath()->thenReturn($expectedResult);
+
+        $result = $this->callProtected($this->tableManager, 'getPossibleDirectories', array($searchPath));
+
+        $this->assertEquals(array('bundle' => array( 'tmp'=> '//tmp' )), $result);
+    }
+
+    /**
+     * testGetTableThrowsErrorWhenTableMissing
+     * @expectedException InvalidArgumentException
+     */
+    public function testGetTableThrowsErrorWhenTableMissing()
+    {
+        $this->tableManager->getTable('test');
+    }
 }
