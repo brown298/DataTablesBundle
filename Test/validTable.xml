@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+
+<DataTables>
+    <Table id="xmlDataTable" >
+        <Columns>
+            <Column source="xml.id" name="User" >
+                <Format>
+                    <DataFields>
+                        <Field source="faq.createdBy.username" name="name" />
+                    </DataFields>
+                    <Template source="Brown298DtTestBundle:DtYmlStyle:nameFormatter.html.twig" />
+                </Format>
+            </Column>
+        </Columns>
+    </Table>
+</DataTables>

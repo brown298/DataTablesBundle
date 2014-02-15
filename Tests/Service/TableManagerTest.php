@@ -38,7 +38,7 @@ class TableManagerTest extends AbstractBaseTest
     private $kernel;
 
     /**
-     * @var Symfony\Component\HttpKernel\Bundle\Bundle
+     * @var \Symfony\Component\HttpKernel\Bundle\Bundle
      */
     protected $bundle;
 
@@ -48,12 +48,11 @@ class TableManagerTest extends AbstractBaseTest
     public function setUp()
     {
         parent::setUp();
-        $this->container = Phake::Mock('\Symfony\Component\DependencyInjection\ContainerInterface');
-        $this->em        = Phake::Mock('\Doctrine\ORM\EntityManager');
-        $this->reader    = Phake::Mock('\Doctrine\Common\Annotations\AnnotationReader');
-        $this->kernel    = Phake::Mock('\Symfony\Component\HttpKernel\Kernel');
-        $this->bundle    = Phake::Mock('Symfony\Component\HttpKernel\Bundle\Bundle');
-
+        $this->container = Phake::mock('\Symfony\Component\DependencyInjection\ContainerInterface');
+        $this->em        = Phake::mock('\Doctrine\ORM\EntityManager');
+        $this->reader    = Phake::mock('\Doctrine\Common\Annotations\AnnotationReader');
+        $this->kernel    = Phake::mock('\Symfony\Component\HttpKernel\Kernel');
+        $this->bundle    = Phake::mock('Symfony\Component\HttpKernel\Bundle\Bundle');
         Phake::when($this->container)->get('kernel')->thenReturn($this->kernel);
 
         $this->tableManager = new TableManager($this->container, $this->reader, array(), array(), $this->em);
@@ -170,4 +169,45 @@ class TableManagerTest extends AbstractBaseTest
     {
         $this->tableManager->getTable('test');
     }
+
+    /**
+     * testParseXmlNonExistantFile
+     * @expectedException RuntimeException
+     */
+    public function testParseXmlNonExistantFile()
+    {
+        $this->callProtected($this->tableManager, 'parseXml', array('fakeFile'));
+    }
+
+    /**
+     * testGetXml
+     */
+    public function testGetXml()
+    {
+        $result = $this->callProtected($this->tableManager, 'getXml', array(__DIR__  . '/../../Test/validTable.xml'));
+        $this->assertInstanceOf('\SimpleXMLElement', $result);
+    }
+
+    /**
+     * testParseXml
+     */
+    public function testParseXml()
+    {
+        $result = $this->callProtected($this->tableManager, 'parseXml', array(__DIR__  . '/../../Test/validTable.xml'));
+        $this->assertGreaterThan(0, count($result));
+        $this->assertArrayHasKey('xmlDataTable', $result);
+        $this->assertArrayHasKey('type', $result['xmlDataTable']);
+        $this->assertArrayHasKey('file', $result['xmlDataTable']);
+        $this->assertArrayHasKey('contents', $result['xmlDataTable']);
+    }
+
+    /**
+     * testParseXmlThrowsExceptionMissingId
+     * @expectedException RuntimeException
+     */
+    public function testParseXmlThrowsExceptionMissingId()
+    {
+        $this->callProtected($this->tableManager, 'parseXml', array(__DIR__  . '/../../Test/invalidTable.xml'));
+    }
+
 }

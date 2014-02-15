@@ -253,7 +253,11 @@ class TableManager
     protected function parseXml($filePath)
     {
         $tables  = array();
-        $parser = simplexml_load_file($filePath);
+        $parser = $this->getXml($filePath);
+
+        if ($parser == false) {
+            throw new \RuntimeException('Error loading config file:' . $filePath);
+        }
 
         foreach($parser->children() as $table) {
             $id = null;
@@ -272,6 +276,19 @@ class TableManager
 
         return $tables;
     }
+
+    /**
+     * @param $filePath
+     * @return \SimpleXMLElement
+     * @throws \RuntimeException
+     */
+    protected function getXml($filePath)
+    {
+        $parser = @simplexml_load_file($filePath);
+
+        return $parser;
+    }
+
 
     /**
      * buildAnnotations
@@ -306,6 +323,7 @@ class TableManager
         foreach($bundleDirs as $bundle=>$directory) {
             foreach ($searchPath as $dir) {
                 $path = $directory . DIRECTORY_SEPARATOR . $dir;
+
                 if (is_dir($path)) {
                     $directories[$bundle][$dir] = $path;
                 }
