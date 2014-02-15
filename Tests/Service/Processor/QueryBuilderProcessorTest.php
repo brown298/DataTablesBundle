@@ -191,7 +191,7 @@ class QueryBuilderProcessorTest extends AbstractBaseTest
         Phake::when($this->query)->getArrayResult()->thenReturn(array(array($expectedResults)));
 
         $result = $this->service->getTotalRecords($this->queryBuilder, 's');
-        Phake::verify($this->queryBuilder)->select(array('count(s.id)'));
+        Phake::verify($this->queryBuilder)->select(array('count(s)'));
         Phake::verify($this->queryBuilder)->setMaxResults(1);
 
         $this->assertEquals($expectedResults, $result);
