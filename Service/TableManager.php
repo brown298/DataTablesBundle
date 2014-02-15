@@ -59,6 +59,11 @@ class TableManager
     protected $em;
 
     /**
+     * @var Parser
+     */
+    protected $parser;
+
+    /**
      * @param ContainerInterface $container
      * @param AnnotationReader $reader
      * @param array $configPathSearch
@@ -228,12 +233,25 @@ class TableManager
     }
 
     /**
+     * getYmlParser
+     *
+     * @return Parser
+     */
+    protected function getYmlParser()
+    {
+        if ($this->parser === null) {
+            $this->parser = new Parser();
+        }
+        return $this->parser;
+    }
+
+    /**
      * @param $filePath
      * @return array
      */
     protected function parseYml($filePath)
     {
-        $parser    = new Parser();
+        $parser    = $this->getYmlParser();
         $contents  = $parser->parse(file_get_contents($filePath));
         $tables   = array();
         if (is_array($contents)) {

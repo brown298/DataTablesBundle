@@ -43,6 +43,11 @@ class TableManagerTest extends AbstractBaseTest
     protected $bundle;
 
     /**
+     * @var \Symfony\Component\Yaml\Parser
+     */
+    protected $parser;
+
+    /**
      * setUp
      */
     public function setUp()
@@ -52,7 +57,8 @@ class TableManagerTest extends AbstractBaseTest
         $this->em        = Phake::mock('\Doctrine\ORM\EntityManager');
         $this->reader    = Phake::mock('\Doctrine\Common\Annotations\AnnotationReader');
         $this->kernel    = Phake::mock('\Symfony\Component\HttpKernel\Kernel');
-        $this->bundle    = Phake::mock('Symfony\Component\HttpKernel\Bundle\Bundle');
+        $this->bundle    = Phake::mock('\Symfony\Component\HttpKernel\Bundle\Bundle');
+        $this->parser    = Phake::mock('\Symfony\Component\Yaml\Parser');
         Phake::when($this->container)->get('kernel')->thenReturn($this->kernel);
 
         $this->tableManager = new TableManager($this->container, $this->reader, array(), array(), $this->em);
@@ -171,6 +177,17 @@ class TableManagerTest extends AbstractBaseTest
     }
 
     /**
+     * testGetTableExisting
+     */
+    public function testGetTableExisting()
+    {
+        $this->setProtectedValue($this->tableManager, 'tables', array('test'=>'value'));
+        $this->setProtectedValue($this->tableManager, 'builtTables', array('test'=>'builtValue'));
+        $result = $this->tableManager->getTable('test');
+        $this->assertEquals('builtValue', $result);
+    }
+
+    /**
      * testParseXmlNonExistantFile
      * @expectedException RuntimeException
      */
@@ -210,4 +227,30 @@ class TableManagerTest extends AbstractBaseTest
         $this->callProtected($this->tableManager, 'parseXml', array(__DIR__  . '/../../Test/invalidTable.xml'));
     }
 
+    /**
+     * testGetYmlParserReturnsParser
+     */
+    public function testGetYmlParserReturnsParser()
+    {
+        $this->assertInstanceOf('\Symfony\Component\Yaml\Parser', $this->callProtected($this->tableManager,'getYmlParser'));
+    }
+
+    /**
+     * testParseYml
+     */
+    public function testParseYml()
+    {
+        $tableConfig = array(
+            'ymlDataTable' => 'config'
+        );
+        $this->setProtectedValue($this->tableManager,'parser',$this->parser);
+        Phake::when($this->parser)->parse(Phake::anyParameters())->thenReturn($tableConfig);
+
+        $result = $this->callProtected($this->tableManager, 'parseYml', array(__DIR__  . '/../../Test/invalidTable.xml'));
+
+        $this->assertArrayHasKey('ymlDataTable', $result);
+        $this->assertArrayHasKey('type', $result['ymlDataTable']);
+        $this->assertArrayHasKey('file', $result['ymlDataTable']);
+        $this->assertArrayHasKey('contents', $result['ymlDataTable']);
+    }
 }
